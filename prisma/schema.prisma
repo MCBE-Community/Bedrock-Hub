@@ -40,7 +40,11 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  gamertag      String?   @unique // Minecraft Gamertag
+  bio           String?   // User bio
+  website       String?   // Personal website
+  twitter       String?   // Twitter handle
+  discord       String?   // Discord username
+  joinedAt      DateTime  @default(now()) // Join date
 
   accounts      Account[]
   sessions      Session[]
@@ -81,7 +85,8 @@ model Resource {
   fileUrl     String   // path to uploaded file
   fileName    String?  // original filename
   fileSize    Int?     // file size in bytes
-  thumbnails  String?  // comma-separated paths to uploaded images
+  thumbnail   String?  // preview image for browse page
+  thumbnails  String?  // comma-separated paths to uploaded screenshots
   downloads   Int      @default(0)
   authorId    String
   createdAt   DateTime @default(now())
@@ -120,6 +125,47 @@ model Server {
   ip          String   @unique
   port        Int      @default(19132)
   description String
-  votes       Int      @default(0)
+  thumbnail   String?  // preview image for browse page
+  discordLink String?  // Discord server invite
+  youtubeLink String?  // YouTube channel link
+  trailerVideo String? // trailer/showcase video URL
+  screenshots String?  // comma-separated paths to uploaded screenshots
   createdAt   DateTime @default(now())
+
+  likes       ServerLike[]
+
+  @@index([createdAt])
+}
+
+model ServerLike {
+  id       String @id @default(cuid())
+  serverId String
+  userId   String
+
+  server   Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@unique([serverId, userId])
+}
+
+model Community {
+  id          String   @id @default(cuid())
+  name        String
+  discordLink String
+  description String
+  thumbnail   String?  // preview image for browse page
+  createdAt   DateTime @default(now())
+
+  likes       CommunityLike[]
+
+  @@index([createdAt])
+}
+
+model CommunityLike {
+  id          String @id @default(cuid())
+  communityId String
+  userId      String
+
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@unique([communityId, userId])
 }

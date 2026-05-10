@@ -18,29 +18,79 @@ export async function POST(req: NextRequest) {
     const category = formData.get("category") as string;
     const resolution = formData.get("resolution") as string;
     const tags = formData.get("tags") as string;
+    const serverIp = formData.get("serverIp") as string;
+    const serverPort = formData.get("serverPort") as string;
+    const discordLink = formData.get("discordLink") as string;
+    const youtubeLink = formData.get("youtubeLink") as string;
+    const trailerVideo = formData.get("trailerVideo") as string;
     const file = formData.get("file") as File | null;
+    const thumbnail = formData.get("thumbnail") as File | null;
     const images = formData.getAll("images") as File[];
 
-    if (!title || !description || !category || !file) {
+    if (!title || !description || !category) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Create upload directories
+    if (!thumbnail) {
+      return NextResponse.json({ error: "Thumbnail image is required" }, { status: 400 });
+    }
+
+    const isMetadataOnly = category === "Server" || category === "Community";
+    if (!file && !isMetadataOnly) {
+      return NextResponse.json({ error: "Missing file upload" }, { status: 400 });
+    }
+
+    if (category === "Server" && !serverIp) {
+      return NextResponse.json({ error: "Server IP is required for server uploads" }, { status: 400 });
+    }
+
+    if (category === "Community" && !discordLink) {
+      return NextResponse.json({ error: "Discord invite is required for community uploads" }, { status: 400 });
+    }
+
+    if ((category === "Server" || category === "Addon" || category === "TexturePack" || category === "Map" || category === "Skin" || category === "Shader" || category === "Other") && images.length === 0) {
+      return NextResponse.json({ error: "At least one screenshot is required" }, { status: 400 });
+    }
+
     const uploadsDir = path.join(process.cwd(), "public", "uploads");
     const filesDir = path.join(uploadsDir, "files");
     const imagesDir = path.join(uploadsDir, "images");
     await mkdir(filesDir, { recursive: true });
     await mkdir(imagesDir, { recursive: true });
 
-    // Save the main file
-    const fileBuffer = Buffer.from(await file.arrayBuffer());
     const timestamp = Date.now();
-    const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const fileKey = `${timestamp}_${safeFileName}`;
-    const filePath = path.join(filesDir, fileKey);
-    await writeFile(filePath, fileBuffer);
+    let fileKey = "";
+    let fileName = "placeholder.txt";
+    let fileSize = 0;
+    let thumbnailPath = "";
 
-    // Save thumbnail images
+    // Process thumbnail
+    if (thumbnail && thumbnail.size > 0) {
+      const thumbBuffer = Buffer.from(await thumbnail.arrayBuffer());
+      const safeThumbName = thumbnail.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const thumbKey = `${timestamp}_thumb_${safeThumbName}`;
+      const thumbPath = path.join(imagesDir, thumbKey);
+      await writeFile(thumbPath, thumbBuffer);
+      thumbnailPath = `/uploads/images/${thumbKey}`;
+    }
+
+    if (file && file.size > 0) {
+      const fileBuffer = Buffer.from(await file.arrayBuffer());
+      const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      fileKey = `${timestamp}_${safeFileName}`;
+      const filePath = path.join(filesDir, fileKey);
+      await writeFile(filePath, fileBuffer);
+      fileName = file.name;
+      fileSize = file.size;
+    } else {
+      const placeholderName = `placeholder_${timestamp}.txt`;
+      const placeholderPath = path.join(filesDir, placeholderName);
+      await writeFile(placeholderPath, Buffer.from(""));
+      fileKey = placeholderName;
+      fileName = placeholderName;
+      fileSize = 0;
+    }
+
     const thumbnailPaths: string[] = [];
     for (let i = 0; i < Math.min(images.length, 5); i++) {
       const img = images[i];
@@ -54,8 +104,37 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Save to database
     const userId = (session.user as any).id;
+
+    if (category === "Server") {
+      const server = await prisma.server.create({
+        data: {
+          name: title,
+          ip: serverIp,
+          port: Number(serverPort) || 19132,
+          description,
+          thumbnail: thumbnailPath,
+          discordLink: discordLink || null,
+          youtubeLink: youtubeLink || null,
+          trailerVideo: trailerVideo || null,
+          screenshots: thumbnailPaths.join(","),
+        },
+      });
+      return NextResponse.json({ success: true, server });
+    }
+
+    if (category === "Community") {
+      const community = await prisma.community.create({
+        data: {
+          name: title,
+          discordLink,
+          description,
+          thumbnail: thumbnailPath,
+        },
+      });
+      return NextResponse.json({ success: true, community });
+    }
+
     const resource = await prisma.resource.create({
       data: {
         title,
@@ -64,8 +143,9 @@ export async function POST(req: NextRequest) {
         resolution: resolution || null,
         tags: tags || null,
         fileUrl: `/uploads/files/${fileKey}`,
-        fileName: file.name,
-        fileSize: file.size,
+        fileName,
+        fileSize,
+        thumbnail: thumbnailPath,
         thumbnails: thumbnailPaths.join(","),
         authorId: userId,
       },

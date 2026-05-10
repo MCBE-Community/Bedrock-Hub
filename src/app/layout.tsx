@@ -21,15 +21,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Providers>
           <NavbarClient />
-          <main style={{ minHeight: "calc(100vh - 200px)", paddingTop: "120px" }}>
+          <main style={{ minHeight: "calc(100vh - 200px)", paddingTop: "100px" }}>
             {children}
           </main>
           <footer className="footer">
             <div className="container">
               <div className="footerInner">
                 <div className="footerTop">
-                  <div className="footerLogo">BedrockHub</div>
-                  <div style={{ display: "flex", gap: "64px", flexWrap: "wrap" }}>
+                  <div style={{ display: "grid", gap: "16px" }}>
+                    <div className="footerLogo">BedrockHub</div>
+                    <p style={{ maxWidth: "380px", color: "var(--text-secondary)", lineHeight: 1.8 }}>
+                      The easiest place to find, upload, and support Bedrock resources, servers, and communities.
+                    </p>
+                  </div>
+                  <div style={{ display: "flex", gap: "48px", flexWrap: "wrap" }}>
                     {footerLinks.map((group) => (
                       <div key={group.title} className="footerLinksGroup">
                         <span>{group.title}</span>
@@ -48,9 +53,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </div>
                 <div className="footerBottom">
                   <div>© 2026 BedrockHub. Not affiliated with Mojang AB.</div>
-                  <div style={{ display: "flex", gap: "16px" }}>
+                  <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", justifyContent: "center" }}>
                     <a href="https://discord.gg/" target="_blank" rel="noopener">Discord</a>
                     <a href="https://twitter.com/" target="_blank" rel="noopener">Twitter</a>
+                    <a href="/auth-error">Support</a>
                   </div>
                 </div>
               </div>

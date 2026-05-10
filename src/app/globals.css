@@ -68,6 +68,56 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); letter-spacing: -0.03
 }
 .navLink svg { width: 16px; height: 16px; }
 .navLink:hover { color: var(--primary); background: rgba(255, 255, 255, 0.06); }
+.mobileMenuBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+}
+.mobileMenuBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+.mobileMenu {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 110px;
+}
+.mobileMenuInner {
+  width: min(100%, 360px);
+  background: rgba(10,10,10,0.96);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.mobileNavLink {
+  display: block;
+  width: 100%;
+  color: var(--text);
+  text-align: left;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.03);
+  font-weight: 500;
+  transition: background var(--transition);
+}
+.mobileNavLink:hover {
+  background: rgba(255,255,255,0.08);
+}
 .signInBtn {
   padding: 8px 20px; background: var(--primary); color: var(--bg);
   border-radius: var(--radius-full); font-weight: 600; font-size: 0.9rem;
@@ -207,10 +257,13 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); letter-spacing: -0.03
 }
 .formTextarea:focus { border-color: var(--primary); background: rgba(255,255,255,0.05); }
 .formSelect {
-  width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.03);
+  width: 100%; padding: 12px 16px; padding-right: 44px; background: rgba(255,255,255,0.03);
   border: 1px solid var(--border); border-radius: var(--radius-sm);
   font-size: 0.95rem; color: var(--text); appearance: none; cursor: pointer;
   transition: all var(--transition); outline: none; font-family: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
 }
 .formSelect:focus { border-color: var(--primary); }
 
@@ -218,8 +271,9 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); letter-spacing: -0.03
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 @media (max-width: 768px) {
-  .navbar { border-radius: var(--radius); width: calc(100% - 48px); justify-content: space-between; }
+  .navbar { border-radius: var(--radius); width: calc(100% - 32px); justify-content: space-between; }
   .navLinks { display: none; }
+  .mobileMenuBtn { display: flex; }
   .gridResources { grid-template-columns: 1fr; }
   .sectionTitle { font-size: 2rem; }
   .footerTop { flex-direction: column; }

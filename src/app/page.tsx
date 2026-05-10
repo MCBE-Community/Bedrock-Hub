@@ -1,13 +1,61 @@
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+
+async function getStats() {
+  try {
+    const [resourceCount, totalDownloads, creatorCount] = await Promise.all([
+      prisma.resource.count(),
+      prisma.resource.aggregate({
+        _sum: { downloads: true },
+      }),
+      prisma.user.count({
+        where: {
+          resources: {
+            some: {},
+          },
+        },
+      }),
+    ]);
+
+    return {
+      resources: resourceCount || 0,
+      downloads: totalDownloads._sum.downloads || 0,
+      creators: creatorCount || 0,
+    };
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+    return { resources: 0, downloads: 0, creators: 0 };
+  }
+}
 
 function DownloadIcon() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
 }
 
-export default function Home() {
+export default async function Home() {
+  const stats = await getStats();
+
   return (
     <>
-      <section style={{ padding: "80px 0 100px", textAlign: "center", position: "relative" }}>
+      <section style={{ 
+        padding: "150px 0 140px", 
+        textAlign: "center", 
+        position: "relative",
+        backgroundImage: `url(/hero.jpg)`,
+        backgroundSize: "cover",
+        backgroundPosition: "center top",
+        backgroundAttachment: "fixed",
+        minHeight: "calc(100vh + 120px)",
+        marginTop: "-100px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}>
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 100%)",
+          pointerEvents: "none",
+        }} />
         <div style={{
           position: "absolute", inset: 0,
           backgroundImage: `linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)`,
@@ -15,7 +63,7 @@ export default function Home() {
           maskImage: "radial-gradient(ellipse at center, black 0%, transparent 70%)",
           WebkitMaskImage: "radial-gradient(ellipse at center, black 0%, transparent 70%)",
         }} />
-        <div className="container" style={{ position: "relative" }}>
+        <div className="container" style={{ position: "relative", zIndex: 1 }}>
           <div style={{
             display: "inline-block", padding: "6px 16px", borderRadius: "9999px",
             border: "1px solid var(--border)", fontSize: "0.85rem", fontWeight: 500,
@@ -70,9 +118,9 @@ export default function Home() {
       <section style={{ padding: "100px 0", textAlign: "center" }}>
         <div className="container">
           <div style={{ display: "flex", gap: "64px", justifyContent: "center", flexWrap: "wrap" }}>
-            <div><div className="statNumber">750+</div><div className="statLabel">Published Resources</div></div>
-            <div><div className="statNumber">138k</div><div className="statLabel">Total Downloads</div></div>
-            <div><div className="statNumber">2.4k</div><div className="statLabel">Active Creators</div></div>
+            <div><div className="statNumber">{stats.resources}+</div><div className="statLabel">Published Resources</div></div>
+            <div><div className="statNumber">{(stats.downloads / 1000).toFixed(0)}k</div><div className="statLabel">Total Downloads</div></div>
+            <div><div className="statNumber">{stats.creators}</div><div className="statLabel">Active Creators</div></div>
           </div>
         </div>
       </section>

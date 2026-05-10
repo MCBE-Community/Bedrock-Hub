@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 type Player = {
   rank: number;
@@ -25,6 +27,8 @@ const rankingsData: Record<string, TierGroup[]> = {
 const categories = ["Overall", "Sword", "Mace"] as const;
 
 export default function RankingsPage() {
+  const { data: session } = useSession();
+  const sessionUser = session?.user as any;
   const [active, setActive] = useState<string>("Overall");
   const [search, setSearch] = useState("");
   const tiers = rankingsData[active] || [];
@@ -51,7 +55,6 @@ export default function RankingsPage() {
         </h1>
         <p style={{ color: "var(--text-secondary)", maxWidth: "600px", margin: "0 auto", fontSize: "1.05rem", lineHeight: 1.6 }}>
           Competitive PvP rankings for Minecraft Bedrock Edition.
-          Link your account via Discord to request a tier test.
         </p>
       </div>
 
