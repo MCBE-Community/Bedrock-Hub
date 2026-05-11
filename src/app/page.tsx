@@ -44,56 +44,36 @@ export default async function Home() {
 
   return (
     <>
-      <section style={{ 
-        padding: "150px 0 140px", 
-        textAlign: "center", 
+      <section style={{
+        padding: "150px 0 140px",
         position: "relative",
-        backgroundImage: `linear-gradient(to bottom, #000, #111)`,
+        backgroundImage: `linear-gradient(180deg, rgba(3, 9, 23, 0.85), rgba(3, 9, 23, 0.2)), url('/hero.jpg')`,
         backgroundSize: "cover",
         backgroundPosition: "center top",
-        backgroundAttachment: "fixed",
+        backgroundRepeat: "fixed",
         minHeight: "calc(100vh + 120px)",
-        marginTop: "-120px",
+        marginTop: "-100px",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
       }}>
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%)",
-          pointerEvents: "none",
-        }} />
-        
-        <div style={{
-          position: "absolute", inset: 0,
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)`,
-          backgroundSize: "40px 40px", pointerEvents: "none",
-          maskImage: "radial-gradient(ellipse at center, black 0%, transparent 70%)",
-          WebkitMaskImage: "radial-gradient(ellipse at center, black 0%, transparent 70%)",
-        }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.25))", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", inset: 0, backgroundImage: `linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)`, backgroundSize: "48px 48px", opacity: 0.35, pointerEvents: "none" }} />
 
-        <div className="container" style={{ position: "relative", zIndex: 1 }}>
-          <div style={{
-            display: "inline-block", padding: "6px 16px", borderRadius: "9999px",
-            border: "1px solid var(--border)", fontSize: "0.85rem", fontWeight: 500,
-            marginBottom: "24px", color: "var(--text-secondary)", backgroundColor: "rgba(255,255,255,0.05)",
-            backdropFilter: "blur(4px)",
-          }}>
-            The next generation of Bedrock resources
+        <div className="container" style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "10px", padding: "8px 18px", borderRadius: "9999px", border: "1px solid rgba(255,255,255,0.16)", color: "#d7e1ff", marginBottom: "24px", background: "rgba(255,255,255,0.06)" }}>
+            <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#60a5fa" }} />
+            Trusted hub for Bedrock creators and players
           </div>
-          <h1 style={{ fontSize: "clamp(3rem, 8vw, 5rem)", fontWeight: 800, lineHeight: 1, marginBottom: "24px", letterSpacing: "-0.04em" }}>
-            The Premium <br />
-            <span style={{ color: "var(--text-secondary)" }}>Bedrock Ecosystem.</span>
+          <h1 style={{ fontSize: "clamp(3rem, 7vw, 5rem)", fontWeight: 800, lineHeight: 1.02, marginBottom: "24px", letterSpacing: "-0.06em", color: "#ffffff" }}>
+            Welcome to BedrockHub
           </h1>
-          <p style={{ maxWidth: "600px", margin: "0 auto 40px", color: "var(--text-secondary)", fontSize: "1.1rem", lineHeight: 1.6 }}>
-            Discover and share the best Texture Packs, Addons and Maps.
-            No invasive ads. No barriers. A purely content-focused experience.
+          <p style={{ maxWidth: "680px", margin: "0 auto 40px", color: "rgba(255,255,255,0.88)", fontSize: "1.1rem", lineHeight: 1.7 }}>
+            Browse hand-picked Texture Packs, Add-Ons, Maps and creator tools built for Minecraft Bedrock. All resources are curated for quality and compatibility.
           </p>
           <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/search" className="btnPrimary">Browse Collection</Link>
-            <a href="https://discord.gg/TQDvhvregC" target="_blank" rel="noopener noreferrer" className="btnOutline">Join Discord</a>
             <Link href="/discover" className="btnPrimary">Browse Collection</Link>
-            <Link href="/upload" className="btnOutline">Upload Creation</Link>
+            <a href="https://discord.gg/TQDvhvregC" target="_blank" rel="noopener noreferrer" className="btnOutline">Join Discord</a>
           </div>
         </div>
       </section>
@@ -162,48 +142,76 @@ export default async function Home() {
         </div>
       </section>
 
-      <section style={{ padding: "100px 0", textAlign: "center" }}>
+      <section style={{ padding: "80px 0", backgroundColor: "var(--bg-secondary)", borderTop: "1px solid var(--border)" }}>
         <div className="container">
-          <h2 className="sectionTitle" style={{ marginBottom: "16px" }}>Featured Servers</h2>
-          <p style={{ color: "var(--text-secondary)", marginBottom: "48px" }}>Explore the most active communities in the Bedrock ecosystem.</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
-            <div className="featureCard" style={{ padding: "24px", textAlign: "left" }}>
-              <div style={{ height: "140px", borderRadius: "12px", background: "linear-gradient(45deg, #1e3a8a, #3b82f6)", marginBottom: "20px" }} />
-              <h3>Premium PvP</h3>
-              <p>The best competitive experience with custom maps and anti-cheat.</p>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>191.23.44.10</span>
-                <button className="btnOutline" style={{ padding: "8px 16px", fontSize: "0.8rem" }}>Join</button>
-              </div>
+          <div style={{ maxWidth: "680px", margin: "0 auto 40px", textAlign: "center" }}>
+            <h2 className="sectionTitle">Browse by Category</h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "1rem", lineHeight: 1.75 }}>
+              Find Texture Packs, Add-Ons, Maps and creator tools that fit your next Minecraft Bedrock project.
+            </p>
+          </div>
+          <div style={{ display: "grid", gap: "20px", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+            <div className="featureCard" style={{ padding: "28px 24px" }}>
+              <h3>Texture Packs</h3>
+              <p style={{ color: "var(--text-secondary)", marginTop: "12px" }}>High-quality visuals built for smooth Bedrock performance.</p>
             </div>
-            <div className="featureCard" style={{ padding: "24px", textAlign: "left" }}>
-              <div style={{ height: "140px", borderRadius: "12px", background: "linear-gradient(45deg, #065f46, #10b981)", marginBottom: "20px" }} />
-              <h3>Survival Realism</h3>
-              <p>A hardcore survival server with custom economy and seasons.</p>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>mc.survival.com</span>
-                <button className="btnOutline" style={{ padding: "8px 16px", fontSize: "0.8rem" }}>Join</button>
-              </div>
+            <div className="featureCard" style={{ padding: "28px 24px" }}>
+              <h3>Add-Ons</h3>
+              <p style={{ color: "var(--text-secondary)", marginTop: "12px" }}>Gameplay expansions, mobs, and mechanics for your world.</p>
             </div>
-            <div className="featureCard" style={{ padding: "24px", textAlign: "left" }}>
-              <div style={{ height: "140px", borderRadius: "12px", background: "linear-gradient(45deg, #7c2d12, #f97316)", marginBottom: "20px" }} />
-              <h3>Skyblock Ultra</h3>
-              <p>New generation of skyblock with custom minions and islands.</p>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>sky.ultra.net</span>
-                <button className="btnOutline" style={{ padding: "8px 16px", fontSize: "0.8rem" }}>Join</button>
-              </div>
+            <div className="featureCard" style={{ padding: "28px 24px" }}>
+              <h3>Maps & Worlds</h3>
+              <p style={{ color: "var(--text-secondary)", marginTop: "12px" }}>Adventure, survival and creative maps ready to play.</p>
+            </div>
+            <div className="featureCard" style={{ padding: "28px 24px" }}>
+              <h3>Creator Tools</h3>
+              <p style={{ color: "var(--text-secondary)", marginTop: "12px" }}>Resources to help creators publish faster and smarter.</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section style={{ padding: "100px 0", textAlign: "center" }}>
+      <section style={{ padding: "80px 0" }}>
+        <div className="container">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "20px", marginBottom: "40px" }}>
+            <div>
+              <h2 className="sectionTitle" style={{ marginBottom: "8px" }}>How it works</h2>
+              <p style={{ color: "var(--text-secondary)" }}>Browse, download, and publish Bedrock content without the usual friction.</p>
+            </div>
+            <Link href="/upload" className="btnOutline">Upload your resource</Link>
+          </div>
+          <div style={{ display: "grid", gap: "24px", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
+            <div className="featureCard" style={{ padding: "28px 24px" }}>
+              <h3>Discover quality content</h3>
+              <p style={{ color: "var(--text-secondary)", marginTop: "12px" }}>Search through vetted packs and maps by category, author, or popularity.</p>
+            </div>
+            <div className="featureCard" style={{ padding: "28px 24px" }}>
+              <h3>Download with confidence</h3>
+              <p style={{ color: "var(--text-secondary)", marginTop: "12px" }}>Every resource goes through review so you get working downloads every time.</p>
+            </div>
+            <div className="featureCard" style={{ padding: "28px 24px" }}>
+              <h3>Share your work</h3>
+              <p style={{ color: "var(--text-secondary)", marginTop: "12px" }}>Upload your own creation and connect with the Bedrock community.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: "100px 0", textAlign: "center", backgroundColor: "var(--bg-secondary)", borderTop: "1px solid var(--border)" }}>
         <div className="container">
           <div style={{ display: "flex", gap: "64px", justifyContent: "center", flexWrap: "wrap" }}>
-            <div><div className="statNumber">{stats.resources}+</div><div className="statLabel">Published Resources</div></div>
-            <div><div className="statNumber">{(stats.downloads / 1000).toFixed(0)}k</div><div className="statLabel">Total Downloads</div></div>
-            <div><div className="statNumber">{stats.creators}</div><div className="statLabel">Active Creators</div></div>
+            <div>
+              <div className="statNumber">{stats.resources.toLocaleString()}</div>
+              <div className="statLabel">Published Resources</div>
+            </div>
+            <div>
+              <div className="statNumber">{stats.downloads.toLocaleString()}</div>
+              <div className="statLabel">Verified Downloads</div>
+            </div>
+            <div>
+              <div className="statNumber">{stats.creators.toLocaleString()}</div>
+              <div className="statLabel">Active Creators</div>
+            </div>
           </div>
         </div>
       </section>
