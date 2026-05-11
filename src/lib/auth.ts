@@ -26,18 +26,35 @@ export const authOptions: NextAuthOptions = {
     async session({ session, user }) {
       if (session.user) {
         (session.user as any).id = user.id;
+        
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
           select: { gamertag: true, role: true }
         });
+
+        // Bootstrap Admin: First user is always ADMIN
+        if (dbUser && dbUser.role === "USER") {
+          const userCount = await prisma.user.count();
+          if (userCount === 1) {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { role: "ADMIN" }
+            });
+            (session.user as any).role = "ADMIN";
+          } else {
+            (session.user as any).role = dbUser.role;
+          }
+        } else {
+          (session.user as any).role = dbUser?.role || "USER";
+        }
+
         (session.user as any).gamertag = dbUser?.gamertag;
-        (session.user as any).role = dbUser?.role;
       }
       return session;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
-    signIn: "/auth/signin", // Custom signin page for better aesthetics
+    signIn: "/auth/signin",
   },
 };
