@@ -92,6 +92,20 @@ export default function UploadPage() {
     reader.readAsDataURL(file);
   };
 
+  const handleImageSelect = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const newImages = Array.from(files);
+    setImages(prev => [...prev, ...newImages]);
+
+    newImages.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreviews(prev => [...prev, e.target?.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const removeThumbnail = () => {
     setThumbnail(null);
     setThumbnailPreview("");
@@ -176,6 +190,10 @@ export default function UploadPage() {
         setError("Discord invite link is required for communities.");
         return;
       }
+      if (images.length === 0) {
+        setError("At least one screenshot is required for communities.");
+        return;
+      }
     }
 
 =======
@@ -238,12 +256,14 @@ export default function UploadPage() {
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <h1 style={{ fontSize: "2.5rem", fontWeight: 800, letterSpacing: "-0.04em", marginBottom: "12px" }}>
-          Resource Uploaded!
+          Upload Submitted
         </h1>
         <p style={{ color: "var(--text-secondary)", marginBottom: "32px", fontSize: "1.05rem" }}>
-          Your resource has been submitted and will be published shortly.
+          Your {uploadType === "resource" ? "resource" : uploadType === "server" ? "server" : "community"} listing has been submitted for review.
         </p>
-        <Link href="/search" className="btnPrimary">Browse Resources</Link>
+        <Link href={uploadType === "server" ? "/servers" : uploadType === "community" ? "/discover" : "/search"} className="btnPrimary">
+          {uploadType === "resource" ? "Browse Resources" : uploadType === "server" ? "Browse Servers" : "Browse Communities"}
+        </Link>
       </div>
     );
   }
@@ -584,11 +604,15 @@ export default function UploadPage() {
           </div>
         )}
 
-        {(uploadType === "resource" || uploadType === "server") && (
+        {uploadType && (
           <div className="formGroup">
-            <label className="formLabel">Screenshots {uploadType === "resource" || uploadType === "server" ? "*" : ""}</label>
+            <label className="formLabel">Screenshots *</label>
             <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", marginBottom: "12px" }}>
-              {uploadType === "resource" ? "Show off your resource with screenshots. At least one is required." : "Showcase your server with screenshots. At least one is required."}
+              {uploadType === "resource"
+                ? "Show off your resource with screenshots. At least one is required."
+                : uploadType === "server"
+                ? "Showcase your server with screenshots. At least one is required."
+                : "Share community highlights with screenshots. At least one is required."}
             </p>
             <div
               onClick={() => imgRef.current?.click()}

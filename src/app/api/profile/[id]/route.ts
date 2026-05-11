@@ -9,7 +9,6 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         id: true,
         name: true,
         image: true,
-        gamertag: true,
         bio: true,
         website: true,
         twitter: true,

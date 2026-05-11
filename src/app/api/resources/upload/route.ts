@@ -41,6 +41,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing file upload" }, { status: 400 });
     }
 
+    if (category === "Server" && !serverIp) {
+      return NextResponse.json({ error: "Server IP is required for server uploads" }, { status: 400 });
+    }
+
+    if (category === "Community" && !discordLink) {
+      return NextResponse.json({ error: "Discord invite is required for community uploads" }, { status: 400 });
+    }
+
+    if (images.length === 0) {
+      return NextResponse.json({ error: "At least one screenshot is required" }, { status: 400 });
+    }
+
     // Create upload directories
     const uploadsDir = path.join(process.cwd(), "public", "uploads");
     const filesDir = path.join(uploadsDir, "files");
@@ -102,6 +114,7 @@ export async function POST(req: NextRequest) {
           discordLink,
           description,
           thumbnail: thumbnailPath,
+          screenshots: thumbnailPaths.join(","),
           status: "PENDING",
         },
       });

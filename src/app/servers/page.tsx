@@ -15,7 +15,7 @@ export default function ServersPage() {
     .filter(s => {
       if (!search.trim()) return true;
       const q = search.toLowerCase();
-      return s.name.toLowerCase().includes(q) || s.ip.toLowerCase().includes(q) || s.tags.some(t => t.toLowerCase().includes(q));
+      return s.name.toLowerCase().includes(q) || s.ip.toLowerCase().includes(q) || s.tags.some((t: string) => t.toLowerCase().includes(q));
     })
     .sort((a, b) => sortBy === "votes" ? b.votes - a.votes : 0);
 
@@ -126,7 +126,7 @@ export default function ServersPage() {
               </button>
 
               <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "8px" }}>
-                {server.tags.map((tag) => (
+                {server.tags.map((tag: string) => (
                   <span key={tag} style={{
                     padding: "3px 10px", background: "rgba(255,255,255,0.04)",
                     border: "1px solid var(--border)", borderRadius: "6px",

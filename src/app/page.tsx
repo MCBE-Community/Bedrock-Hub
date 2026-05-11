@@ -90,6 +90,8 @@ export default async function Home() {
             No invasive ads. No barriers. A purely content-focused experience.
           </p>
           <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
+            <Link href="/search" className="btnPrimary">Browse Collection</Link>
+            <a href="https://discord.gg/TQDvhvregC" target="_blank" rel="noopener noreferrer" className="btnOutline">Join Discord</a>
             <Link href="/discover" className="btnPrimary">Browse Collection</Link>
             <Link href="/upload" className="btnOutline">Upload Creation</Link>
           </div>

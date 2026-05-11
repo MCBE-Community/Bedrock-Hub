@@ -8,7 +8,6 @@ interface UserProfile {
   id: string;
   name: string | null;
   image: string | null;
-  gamertag: string | null;
   bio: string | null;
   website: string | null;
   twitter: string | null;

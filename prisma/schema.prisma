@@ -191,6 +191,8 @@ model Community {
   name        String
   discordLink String
   description String
+  thumbnail   String?  // preview image for browse page
+  screenshots String?  // comma-separated paths to uploaded screenshots
   thumbnail   String?
   status      String   @default("PENDING")
   createdAt   DateTime @default(now())
