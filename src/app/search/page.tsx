@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState, useMemo, useEffect } from "react";
@@ -6,17 +6,10 @@ import { useState, useMemo, useEffect } from "react";
 const typeOptions = ["All", "TexturePack", "Addon", "Map", "Shader", "Skin"];
 const tagOptions = ["All", "PvP", "Original", "Aesthetic", "FPS Boost", "Bedwars", "Crystal", "Anime", "Shaders", "Survival", "Sky", "Skyblock"];
 const resOptions = ["All", "16x", "32x", "64x", "128x", "256x"];
-const dateOptions = [
-  { label: "All Time", value: "all" },
-  { label: "Last 24h", value: "day" },
-  { label: "Last Week", value: "week" },
-  { label: "Last Month", value: "month" },
-];
 const sortOptions = [
   { label: "Most Recent", value: "recent" },
   { label: "Most Popular", value: "popular" },
-  { label: "Most Viewed", value: "views" },
-  { label: "Best Rated", value: "rating" },
+  { label: "A-Z", value: "az" },
 ];
 
 export default function SearchPage() {
@@ -33,27 +26,36 @@ export default function SearchPage() {
   const [typeFilter, setTypeFilter] = useState("All");
   const [tagFilter, setTagFilter] = useState("All");
   const [resFilter, setResFilter] = useState("All");
-  const [dateFilter, setDateFilter] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   useEffect(() => {
+<<<<<<< HEAD
     setLoading(true);
-    const params = new URLSearchParams({
-      category: typeFilter === "All" ? "" : typeFilter,
-      resolution: resFilter === "All" ? "" : resFilter,
-      sort: sortBy,
-      date: dateFilter,
-      q: query
-    });
-
-    fetch(`/api/resources?${params.toString()}`)
-      .then(res => res.json())
-      .then(resData => {
+    Promise.all([
+      fetch("/api/resources").then(res => res.json()),
+      fetch("/api/servers").then(res => res.json()),
+      fetch("/api/communities").then(res => res.json()),
+    ])
+      .then(([resData, srvData, comData]) => {
         if (Array.isArray(resData)) setResources(resData);
+        if (Array.isArray(srvData)) setServers(srvData);
+        if (Array.isArray(comData)) setCommunities(comData);
+=======
+    fetch("/api/resources")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setResources(data);
+        }
+>>>>>>> e8416ed (Initial commit from Antigravity)
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
         setLoading(false);
       });
-  }, [typeFilter, resFilter, sortBy, dateFilter, query]);
+  }, []);
 
   const filtered = useMemo(() => {
 <<<<<<< HEAD

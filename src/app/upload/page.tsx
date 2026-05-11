@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState, useRef } from "react";
@@ -92,20 +92,6 @@ export default function UploadPage() {
     reader.readAsDataURL(file);
   };
 
-  const handleImageSelect = (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    const newImages = Array.from(files);
-    setImages(prev => [...prev, ...newImages]);
-
-    newImages.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreviews(prev => [...prev, e.target?.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
   const removeThumbnail = () => {
     setThumbnail(null);
     setThumbnailPreview("");
@@ -190,10 +176,6 @@ export default function UploadPage() {
         setError("Discord invite link is required for communities.");
         return;
       }
-      if (images.length === 0) {
-        setError("At least one screenshot is required for communities.");
-        return;
-      }
     }
 
 =======
@@ -256,14 +238,12 @@ export default function UploadPage() {
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <h1 style={{ fontSize: "2.5rem", fontWeight: 800, letterSpacing: "-0.04em", marginBottom: "12px" }}>
-          Upload Submitted
+          Resource Uploaded!
         </h1>
         <p style={{ color: "var(--text-secondary)", marginBottom: "32px", fontSize: "1.05rem" }}>
-          Your {uploadType === "resource" ? "resource" : uploadType === "server" ? "server" : "community"} listing has been submitted for review.
+          Your resource has been submitted and will be published shortly.
         </p>
-        <Link href={uploadType === "server" ? "/servers" : uploadType === "community" ? "/discover" : "/search"} className="btnPrimary">
-          {uploadType === "resource" ? "Browse Resources" : uploadType === "server" ? "Browse Servers" : "Browse Communities"}
-        </Link>
+        <Link href="/search" className="btnPrimary">Browse Resources</Link>
       </div>
     );
   }
@@ -426,7 +406,7 @@ export default function UploadPage() {
                   Click to upload thumbnail image
                 </div>
                 <div style={{ color: "var(--text-muted)", fontSize: "0.8rem", marginTop: "8px" }}>
-                  PNG, JPG, WebP — Max 5MB — Recommended: 1280x720
+                  PNG, JPG, WebP ΓÇö Max 5MB ΓÇö Recommended: 1280x720
                 </div>
               </div>
             )}
@@ -594,7 +574,7 @@ export default function UploadPage() {
                     Drag & drop your file here or click to browse
                   </div>
                   <div style={{ color: "var(--text-muted)", fontSize: "0.8rem", marginTop: "8px" }}>
-                    .mcpack, .mcaddon, .zip — Max 50MB
+                    .mcpack, .mcaddon, .zip ΓÇö Max 50MB
                   </div>
                 </div>
               )}
@@ -604,15 +584,11 @@ export default function UploadPage() {
           </div>
         )}
 
-        {uploadType && (
+        {(uploadType === "resource" || uploadType === "server") && (
           <div className="formGroup">
-            <label className="formLabel">Screenshots *</label>
+            <label className="formLabel">Screenshots {uploadType === "resource" || uploadType === "server" ? "*" : ""}</label>
             <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", marginBottom: "12px" }}>
-              {uploadType === "resource"
-                ? "Show off your resource with screenshots. At least one is required."
-                : uploadType === "server"
-                ? "Showcase your server with screenshots. At least one is required."
-                : "Share community highlights with screenshots. At least one is required."}
+              {uploadType === "resource" ? "Show off your resource with screenshots. At least one is required." : "Showcase your server with screenshots. At least one is required."}
             </p>
             <div
               onClick={() => imgRef.current?.click()}
@@ -661,7 +637,7 @@ export default function UploadPage() {
                     Add screenshots to showcase your {uploadType}
                   </div>
                   <div style={{ color: "var(--text-muted)", fontSize: "0.8rem", marginTop: "8px" }}>
-                    PNG, JPG, WebP — Up to 5 images
+                    PNG, JPG, WebP ΓÇö Up to 5 images
                   </div>
                 </div>
               )}
@@ -717,7 +693,7 @@ export default function UploadPage() {
                   Drag & drop your file here or click to browse
                 </div>
                 <div style={{ color: "var(--text-muted)", fontSize: "0.8rem", marginTop: "8px" }}>
-                  .mcpack, .mcaddon, .zip — Max 50MB
+                  .mcpack, .mcaddon, .zip ΓÇö Max 50MB
                 </div>
               </div>
             )}

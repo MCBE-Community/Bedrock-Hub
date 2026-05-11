@@ -20,7 +20,7 @@ async function getStats() {
 
     return {
       resources: resourceCount || 0,
-      downloads: totalDownloads._sum.downloads || 0,
+      downloads: totalDownloads._sum?.downloads || 0,
       creators: creatorCount || 0,
     };
   } catch (error) {

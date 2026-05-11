@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
           discordLink,
           description,
           thumbnail: thumbnailPath,
-          screenshots: thumbnailPaths.join(","),
+          screenshots: galleryPaths.join(","),
           status: "PENDING",
         },
       });
