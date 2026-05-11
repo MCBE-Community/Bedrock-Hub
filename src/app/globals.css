@@ -32,7 +32,7 @@ body {
   color: var(--text);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -moz-osx-osx-font-smoothing: grayscale;
   min-height: 100vh;
 }
 
@@ -55,6 +55,12 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); letter-spacing: -0.03
   border: 1px solid var(--border); border-radius: var(--radius-full);
   padding: 8px 12px; display: flex; align-items: center; gap: 24px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  transition: all var(--transition);
+}
+.navbarScrolled {
+  background: rgba(0, 0, 0, 0.85);
+  padding: 6px 12px;
+  top: 12px;
 }
 .navLogo {
   font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800;
@@ -68,6 +74,7 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); letter-spacing: -0.03
 }
 .navLink svg { width: 16px; height: 16px; }
 .navLink:hover { color: var(--primary); background: rgba(255, 255, 255, 0.06); }
+
 .mobileMenuBtn {
   display: none;
   align-items: center;
@@ -92,6 +99,7 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); letter-spacing: -0.03
   justify-content: center;
   align-items: flex-start;
   padding-top: 110px;
+  pointer-events: auto;
 }
 .mobileMenuInner {
   width: min(100%, 360px);
@@ -118,6 +126,7 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); letter-spacing: -0.03
 .mobileNavLink:hover {
   background: rgba(255,255,255,0.08);
 }
+
 .signInBtn {
   padding: 8px 20px; background: var(--primary); color: var(--bg);
   border-radius: var(--radius-full); font-weight: 600; font-size: 0.9rem;
@@ -214,19 +223,6 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); letter-spacing: -0.03
 }
 .filterBtn:hover { border-color: var(--border-hover); color: var(--text); background: rgba(255, 255, 255, 0.03); }
 .filterBtn svg { width: 16px; height: 16px; }
-
-.faqItem { border-bottom: 1px solid var(--border); padding: 24px 0; }
-.faqQuestion {
-  font-family: var(--font-heading); font-size: 1.1rem; font-weight: 500;
-  color: var(--primary); cursor: pointer; display: flex; align-items: center;
-  justify-content: space-between; width: 100%; text-align: left; padding: 0;
-  transition: color var(--transition);
-}
-.faqQuestion:hover { opacity: 0.8; }
-.faqAnswer {
-  color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7;
-  margin-top: 12px; padding-right: 40px;
-}
 
 .footer { border-top: 1px solid var(--border); padding: 64px 0 40px; margin-top: 100px; background: var(--bg); }
 .footerInner { display: flex; flex-direction: column; gap: 48px; }

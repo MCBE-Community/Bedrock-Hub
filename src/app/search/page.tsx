@@ -13,10 +13,14 @@ const sortOptions = [
 ];
 
 export default function SearchPage() {
+<<<<<<< HEAD
   const [tab, setTab] = useState<"resources" | "servers" | "communities">("resources");
   const [resources, setResources] = useState<any[]>([]);
   const [servers, setServers] = useState<any[]>([]);
   const [communities, setCommunities] = useState<any[]>([]);
+=======
+  const [resources, setResources] = useState<any[]>([]);
+>>>>>>> e8416ed (Initial commit from Antigravity)
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("All");
@@ -26,6 +30,7 @@ export default function SearchPage() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   useEffect(() => {
+<<<<<<< HEAD
     setLoading(true);
     Promise.all([
       fetch("/api/resources").then(res => res.json()),
@@ -36,6 +41,14 @@ export default function SearchPage() {
         if (Array.isArray(resData)) setResources(resData);
         if (Array.isArray(srvData)) setServers(srvData);
         if (Array.isArray(comData)) setCommunities(comData);
+=======
+    fetch("/api/resources")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setResources(data);
+        }
+>>>>>>> e8416ed (Initial commit from Antigravity)
         setLoading(false);
       })
       .catch(err => {
@@ -45,6 +58,7 @@ export default function SearchPage() {
   }, []);
 
   const filtered = useMemo(() => {
+<<<<<<< HEAD
     let results = tab === "resources" ? [...resources] : tab === "servers" ? [...servers] : [...communities];
 
     if (query.trim()) {
@@ -82,6 +96,28 @@ export default function SearchPage() {
 
     return results;
   }, [resources, servers, communities, tab, query, typeFilter, tagFilter, resFilter, sortBy]);
+=======
+    let results = [...resources];
+
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      results = results.filter(r =>
+        r.title.toLowerCase().includes(q) ||
+        (r.author?.name || "").toLowerCase().includes(q) ||
+        (r.tags || "").toLowerCase().includes(q)
+      );
+    }
+
+    if (typeFilter !== "All") results = results.filter(r => r.category === typeFilter);
+    if (tagFilter !== "All") results = results.filter(r => (r.tags || "").includes(tagFilter));
+    if (resFilter !== "All") results = results.filter(r => r.resolution === resFilter);
+
+    if (sortBy === "popular") results.sort((a, b) => b.downloads - a.downloads);
+    else if (sortBy === "az") results.sort((a, b) => a.title.localeCompare(b.title));
+
+    return results;
+  }, [resources, query, typeFilter, tagFilter, resFilter, sortBy]);
+>>>>>>> e8416ed (Initial commit from Antigravity)
 
   const toggleDropdown = (id: string) => {
     setOpenDropdown(openDropdown === id ? null : id);
@@ -141,6 +177,7 @@ export default function SearchPage() {
           Browse Resources
         </h1>
         <p style={{ color: "var(--text-secondary)", maxWidth: "600px", margin: "0 auto", fontSize: "1.1rem", lineHeight: 1.6 }}>
+<<<<<<< HEAD
           Find and download the best Texture Packs, Addons, Maps, Servers and Communities.
         </p>
       </div>
@@ -166,6 +203,12 @@ export default function SearchPage() {
         ))}
       </div>
 
+=======
+          Find and download the best Texture Packs, Addons, Maps and more.
+        </p>
+      </div>
+
+>>>>>>> e8416ed (Initial commit from Antigravity)
       <div className="searchWrap">
         <svg className="searchIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -173,12 +216,17 @@ export default function SearchPage() {
         <input
           type="text"
           className="searchInput"
+<<<<<<< HEAD
           placeholder={tab === "resources" ? "Search packs, tags, creators..." : tab === "servers" ? "Search servers by name or IP..." : "Search communities..."}
+=======
+          placeholder="Search packs, tags, creators..."
+>>>>>>> e8416ed (Initial commit from Antigravity)
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
       </div>
 
+<<<<<<< HEAD
       {tab === "resources" && (
         <div className="filterRow" onClick={(e) => e.stopPropagation()}>
           <DropdownBtn id="type" label="All Types" options={typeOptions} value={typeFilter} onChange={setTypeFilter} />
@@ -231,6 +279,58 @@ export default function SearchPage() {
           )}
         </div>
       )}
+=======
+      <div className="filterRow" onClick={(e) => e.stopPropagation()}>
+        <DropdownBtn id="type" label="All Types" options={typeOptions} value={typeFilter} onChange={setTypeFilter} />
+        <DropdownBtn id="tag" label="All Tags" options={tagOptions} value={tagFilter} onChange={setTagFilter} />
+        <DropdownBtn id="res" label="Any Resolution" options={resOptions} value={resFilter} onChange={setResFilter} />
+        <div style={{ position: "relative" }}>
+          <button className="filterBtn" onClick={() => toggleDropdown("sort")}>
+            {sortOptions.find(s => s.value === sortBy)?.label}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginLeft: 4 }}><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          {openDropdown === "sort" && (
+            <div style={{
+              position: "absolute", top: "calc(100% + 6px)", left: 0,
+              background: "rgba(10,10,10,0.95)", backdropFilter: "blur(20px)",
+              border: "1px solid var(--border)", borderRadius: "12px",
+              padding: "6px", minWidth: "180px", zIndex: 50,
+              boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
+            }}>
+              {sortOptions.map(opt => (
+                <button key={opt.value}
+                  onClick={() => { setSortBy(opt.value); setOpenDropdown(null); }}
+                  style={{
+                    display: "block", width: "100%", padding: "10px 14px",
+                    textAlign: "left", fontSize: "0.9rem", borderRadius: "8px",
+                    color: sortBy === opt.value ? "var(--primary)" : "var(--text-secondary)",
+                    fontWeight: sortBy === opt.value ? 600 : 400,
+                    transition: "all 0.15s",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {(typeFilter !== "All" || tagFilter !== "All" || resFilter !== "All") && (
+          <button
+            onClick={() => { setTypeFilter("All"); setTagFilter("All"); setResFilter("All"); }}
+            style={{
+              padding: "10px 16px", borderRadius: "9999px",
+              background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)",
+              color: "#ef4444", fontSize: "0.85rem", fontWeight: 500, cursor: "pointer",
+            }}
+          >
+            Clear Filters
+          </button>
+        )}
+      </div>
+>>>>>>> e8416ed (Initial commit from Antigravity)
 
       <div style={{ marginBottom: "24px", color: "var(--text-muted)", fontSize: "0.9rem" }}>
         {filtered.length} {filtered.length === 1 ? "result" : "results"}
@@ -241,6 +341,7 @@ export default function SearchPage() {
           <div style={{ width: 40, height: 40, borderRadius: "50%", border: "3px solid var(--border)", borderTopColor: "var(--primary)", animation: "spin 0.8s linear infinite", margin: "0 auto" }} />
         </div>
       ) : filtered.length > 0 ? (
+<<<<<<< HEAD
         <>
           {tab === "resources" ? (
             <div className="gridResources">
@@ -318,11 +419,50 @@ export default function SearchPage() {
             </div>
           )}
         </>
+=======
+        <div className="gridResources">
+          {filtered.map((pack) => {
+            const displayTag = pack.tags ? pack.tags.split(',')[0] : "Resource";
+            const imageUrl = pack.thumbnails ? pack.thumbnails.split(',')[0] : null;
+            return (
+              <Link key={pack.id} href={`/resource/${pack.id}`} style={{ textDecoration: "none" }}>
+                <div className="resourceCard">
+                  <div className="cardImageWrap">
+                    {imageUrl ? (
+                      <img src={imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : (
+                      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#0a0a0a" }}>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                      </div>
+                    )}
+                    {pack.resolution && <div className="cardBadge">{pack.resolution}</div>}
+                  </div>
+                  <div className="cardBody">
+                    <div className="cardTitle">{pack.title}</div>
+                    <div className="cardAuthor">by {pack.author?.name || "Unknown"}</div>
+                    <div className="cardFooter">
+                      <div className="cardDownloads">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        {pack.downloads.toLocaleString()}
+                      </div>
+                      <div className="cardTag">{displayTag}</div>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+>>>>>>> e8416ed (Initial commit from Antigravity)
       ) : (
         <div style={{ textAlign: "center", padding: "80px 0" }}>
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" style={{ margin: "0 auto 16px" }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <div style={{ color: "var(--text-muted)", fontSize: "1.1rem" }}>
+<<<<<<< HEAD
             No {tab} found.
+=======
+            No resources found.
+>>>>>>> e8416ed (Initial commit from Antigravity)
           </div>
         </div>
       )}

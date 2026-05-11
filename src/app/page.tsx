@@ -4,14 +4,15 @@ import { prisma } from "@/lib/prisma";
 async function getStats() {
   try {
     const [resourceCount, totalDownloads, creatorCount] = await Promise.all([
-      prisma.resource.count(),
+      prisma.resource.count({ where: { status: "APPROVED" } }),
       prisma.resource.aggregate({
+        where: { status: "APPROVED" },
         _sum: { downloads: true },
       }),
       prisma.user.count({
         where: {
           resources: {
-            some: {},
+            some: { status: "APPROVED" },
           },
         },
       }),
@@ -46,16 +47,17 @@ export default async function Home() {
         backgroundPosition: "center top",
         backgroundAttachment: "fixed",
         minHeight: "calc(100vh + 120px)",
-        marginTop: "-100px",
+        marginTop: "-120px",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
       }}>
         <div style={{
           position: "absolute", inset: 0,
-          background: "linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 100%)",
+          background: "linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%)",
           pointerEvents: "none",
         }} />
+        
         <div style={{
           position: "absolute", inset: 0,
           backgroundImage: `linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)`,
@@ -63,11 +65,13 @@ export default async function Home() {
           maskImage: "radial-gradient(ellipse at center, black 0%, transparent 70%)",
           WebkitMaskImage: "radial-gradient(ellipse at center, black 0%, transparent 70%)",
         }} />
+
         <div className="container" style={{ position: "relative", zIndex: 1 }}>
           <div style={{
             display: "inline-block", padding: "6px 16px", borderRadius: "9999px",
             border: "1px solid var(--border)", fontSize: "0.85rem", fontWeight: 500,
-            marginBottom: "24px", color: "var(--text-secondary)", backgroundColor: "rgba(255,255,255,0.02)",
+            marginBottom: "24px", color: "var(--text-secondary)", backgroundColor: "rgba(255,255,255,0.05)",
+            backdropFilter: "blur(4px)",
           }}>
             The next generation of Bedrock resources
           </div>
@@ -80,7 +84,7 @@ export default async function Home() {
             No invasive ads. No barriers. A purely content-focused experience.
           </p>
           <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/search" className="btnPrimary">Browse Collection</Link>
+            <Link href="/discover" className="btnPrimary">Browse Collection</Link>
             <Link href="/upload" className="btnOutline">Upload Creation</Link>
           </div>
         </div>
