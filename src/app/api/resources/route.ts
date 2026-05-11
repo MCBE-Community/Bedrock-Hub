@@ -8,6 +8,7 @@ export async function GET(req: NextRequest) {
     const category = searchParams.get("category") || "";
     const resolution = searchParams.get("resolution") || "";
     const sort = searchParams.get("sort") || "recent";
+    const dateRange = searchParams.get("date") || "all";
 
     const where: any = { status: "APPROVED" };
     if (q) {
@@ -20,9 +21,18 @@ export async function GET(req: NextRequest) {
     if (category) where.category = category;
     if (resolution) where.resolution = resolution;
 
-    const orderBy: any = sort === "popular"
-      ? { downloads: "desc" }
-      : { createdAt: "desc" };
+    if (dateRange !== "all") {
+      const date = new Date();
+      if (dateRange === "day") date.setDate(date.getDate() - 1);
+      if (dateRange === "week") date.setDate(date.getDate() - 7);
+      if (dateRange === "month") date.setMonth(date.getMonth() - 1);
+      where.createdAt = { gte: date };
+    }
+
+    let orderBy: any = { createdAt: "desc" };
+    if (sort === "popular") orderBy = { downloads: "desc" };
+    if (sort === "views") orderBy = { views: "desc" };
+    if (sort === "rating") orderBy = { reviews: { _count: "desc" } };
 
     const resources = await prisma.resource.findMany({
       where,
