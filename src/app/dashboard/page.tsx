@@ -130,7 +130,7 @@ export default function Dashboard() {
               ))}
               {data?.uploads?.length === 0 && (
                 <div style={{ padding: "60px", textAlign: "center", background: "var(--bg-card)", borderRadius: "24px", border: "1px dashed var(--border)" }}>
-                  <p style={{ color: "var(--text-muted)" }}>You haven't uploaded anything yet.</p>
+                  <p style={{ color: "var(--text-muted)" }}>You haven&apos;t uploaded anything yet.</p>
                 </div>
               )}
             </div>
