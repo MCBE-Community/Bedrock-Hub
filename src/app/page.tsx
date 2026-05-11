@@ -35,6 +35,12 @@ function DownloadIcon() {
 
 export default async function Home() {
   const stats = await getStats();
+  const trending = await prisma.resource.findMany({
+    where: { status: "APPROVED" },
+    orderBy: { downloads: "desc" },
+    include: { author: { select: { name: true } } },
+    take: 4,
+  });
 
   return (
     <>
@@ -115,6 +121,41 @@ export default async function Home() {
               <h3>Cross-Platform</h3>
               <p>Resources compatible with Windows, iOS, Android and Consoles. Optimized for 16x and 32x.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: "100px 0" }}>
+        <div className="container">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "48px" }}>
+            <div>
+              <h2 className="sectionTitle" style={{ textAlign: "left", marginBottom: "8px" }}>Trending Now</h2>
+              <p style={{ color: "var(--text-secondary)" }}>The most downloaded resources this week.</p>
+            </div>
+            <Link href="/discover" className="btnOutline">View All</Link>
+          </div>
+          <div className="gridResources">
+            {trending.map((pack) => (
+              <Link key={pack.id} href={`/resource/${pack.id}`} style={{ textDecoration: "none" }}>
+                <div className="resourceCard">
+                  <div className="cardImageWrap">
+                    <img src={pack.thumbnail || "/placeholder.png"} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <div className="cardBadge">{pack.resolution || "Pack"}</div>
+                  </div>
+                  <div className="cardBody">
+                    <div className="cardTitle">{pack.title}</div>
+                    <div className="cardAuthor">by {pack.author?.name || "Unknown"}</div>
+                    <div className="cardFooter">
+                      <div className="cardDownloads">
+                        <DownloadIcon />
+                        {pack.downloads.toLocaleString()}
+                      </div>
+                      <div className="cardTag">{pack.category}</div>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
