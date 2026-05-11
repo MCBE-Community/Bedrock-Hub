@@ -93,6 +93,7 @@ model Resource {
   resolution  String?
   tags        String?
   thumbnail   String?
+  thumbnails  String?
   status      String   @default("PENDING")
   downloads   Int      @default(0)
   views       Int      @default(0)
