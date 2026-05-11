@@ -1,0 +1,23 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+export async function GET(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if ((session?.user as any)?.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const applications = await prisma.verificationApplication.findMany({
+      where: { status: "PENDING" },
+      include: { user: { select: { id: true, name: true, email: true } } },
+      orderBy: { createdAt: "desc" }
+    });
+
+    return NextResponse.json(applications);
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to fetch applications" }, { status: 500 });
+  }
+}
