@@ -42,7 +42,7 @@ export default async function Home() {
         padding: "150px 0 140px", 
         textAlign: "center", 
         position: "relative",
-        backgroundImage: `url(/hero.jpg)`,
+        backgroundImage: `linear-gradient(to bottom, #000, #111)`,
         backgroundSize: "cover",
         backgroundPosition: "center top",
         backgroundAttachment: "fixed",
@@ -114,6 +114,42 @@ export default async function Home() {
               </div>
               <h3>Cross-Platform</h3>
               <p>Resources compatible with Windows, iOS, Android and Consoles. Optimized for 16x and 32x.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: "100px 0", textAlign: "center" }}>
+        <div className="container">
+          <h2 className="sectionTitle" style={{ marginBottom: "16px" }}>Featured Servers</h2>
+          <p style={{ color: "var(--text-secondary)", marginBottom: "48px" }}>Explore the most active communities in the Bedrock ecosystem.</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
+            <div className="featureCard" style={{ padding: "24px", textAlign: "left" }}>
+              <div style={{ height: "140px", borderRadius: "12px", background: "linear-gradient(45deg, #1e3a8a, #3b82f6)", marginBottom: "20px" }} />
+              <h3>Premium PvP</h3>
+              <p>The best competitive experience with custom maps and anti-cheat.</p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>191.23.44.10</span>
+                <button className="btnOutline" style={{ padding: "8px 16px", fontSize: "0.8rem" }}>Join</button>
+              </div>
+            </div>
+            <div className="featureCard" style={{ padding: "24px", textAlign: "left" }}>
+              <div style={{ height: "140px", borderRadius: "12px", background: "linear-gradient(45deg, #065f46, #10b981)", marginBottom: "20px" }} />
+              <h3>Survival Realism</h3>
+              <p>A hardcore survival server with custom economy and seasons.</p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>mc.survival.com</span>
+                <button className="btnOutline" style={{ padding: "8px 16px", fontSize: "0.8rem" }}>Join</button>
+              </div>
+            </div>
+            <div className="featureCard" style={{ padding: "24px", textAlign: "left" }}>
+              <div style={{ height: "140px", borderRadius: "12px", background: "linear-gradient(45deg, #7c2d12, #f97316)", marginBottom: "20px" }} />
+              <h3>Skyblock Ultra</h3>
+              <p>New generation of skyblock with custom minions and islands.</p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>sky.ultra.net</span>
+                <button className="btnOutline" style={{ padding: "8px 16px", fontSize: "0.8rem" }}>Join</button>
+              </div>
             </div>
           </div>
         </div>

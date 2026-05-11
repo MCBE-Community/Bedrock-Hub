@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
     const q = searchParams.get("q") || "";
     const sort = searchParams.get("sort") || "likes";
 
-    const where: any = {};
+    const where: any = { status: "APPROVED" };
     if (q) {
       where.OR = [
         { name: { contains: q, mode: "insensitive" } },

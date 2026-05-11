@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     const resolution = searchParams.get("resolution") || "";
     const sort = searchParams.get("sort") || "recent";
 
-    const where: any = {};
+    const where: any = { status: "APPROVED" };
     if (q) {
       where.OR = [
         { title: { contains: q } },

@@ -1,146 +1,122 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSession, signIn } from "next-auth/react";
-import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
-  const sessionUser = session?.user as any;
-  const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
-  const [website, setWebsite] = useState("");
-  const [twitter, setTwitter] = useState("");
-  const [discord, setDiscord] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const router = useRouter();
+  const [gamertag, setGamertag] = useState("");
   const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (sessionUser) {
-      setName(sessionUser.name || "");
-      setBio(sessionUser.bio || "");
-      setWebsite(sessionUser.website || "");
-      setTwitter(sessionUser.twitter || "");
-      setDiscord(sessionUser.discord || "");
+    if (status === "unauthenticated") {
+      router.push("/auth/signin");
+    } else if (session?.user) {
+      setGamertag((session.user as any).gamertag || "");
     }
-  }, [sessionUser]);
+  }, [status, session]);
 
-  if (status === "loading") {
-    return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
-        <div style={{ width: 40, height: 40, borderRadius: "50%", border: "3px solid var(--border)", borderTopColor: "var(--primary)", animation: "spin 0.8s linear infinite" }} />
-      </div>
-    );
-  }
-
-  if (!session?.user) {
-    return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", textAlign: "center", padding: "40px 24px" }}>
-        <h1 style={{ fontSize: "2rem", fontWeight: 800, marginBottom: "16px" }}>Profile Access Required</h1>
-        <p style={{ color: "var(--text-secondary)", fontSize: "1rem", marginBottom: "24px", maxWidth: "420px" }}>
-          You need to sign in with Discord before you can manage your profile.
-        </p>
-        <button onClick={() => signIn("discord")} className="btnPrimary" style={{ padding: "14px 32px", fontSize: "1rem" }}>
-          Sign in with Discord
-        </button>
-      </div>
-    );
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setMessage("");
     setSaving(true);
-
+    setMessage("");
     try {
-      const res = await fetch("/api/profile", {
+      const res = await fetch("/api/user/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, bio, website, twitter, discord }),
+        body: JSON.stringify({ gamertag }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Unable to save profile.");
-      setMessage("Profile saved successfully.");
-    } catch (err: any) {
-      setError(err.message || "Unable to save profile.");
+      if (res.ok) {
+        setMessage("Profile updated successfully!");
+      } else {
+        const error = await res.json();
+        setMessage(error.error || "Update failed");
+      }
+    } catch (error) {
+      setMessage("Failed to update profile");
     } finally {
       setSaving(false);
     }
   };
 
+  if (status === "loading") return <div className="container" style={{ padding: "100px 0", textAlign: "center" }}>Loading...</div>;
+
   return (
-    <div className="container" style={{ paddingBottom: "100px", maxWidth: "720px" }}>
-      <div style={{ marginBottom: "36px" }}>
-        <h1 style={{ fontSize: "2.5rem", fontWeight: 800, letterSpacing: "-0.04em", marginBottom: "12px" }}>Profile</h1>
-        <p style={{ color: "var(--text-secondary)", fontSize: "1.05rem", lineHeight: 1.7, maxWidth: "680px" }}>
-          Manage your BedrockHub profile, including your display name, bio, and social links.
-        </p>
-      </div>
-
-      <div style={{ display: "grid", gap: "18px", marginBottom: "30px" }}>
-        <div style={{ display: "grid", gap: "4px" }}>
-          <span style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>Discord</span>
-          <strong style={{ fontSize: "1rem" }}>{sessionUser?.email}</strong>
-        </div>
-        <div style={{ display: "grid", gap: "4px" }}>
-          <span style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>Joined</span>
-          <strong style={{ fontSize: "1rem" }}>{sessionUser?.joinedAt ? new Date(sessionUser.joinedAt).toLocaleDateString() : "Unknown"}</strong>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit} style={{ display: "grid", gap: "24px" }}>
-        {error && (
-          <div style={{ padding: "14px 18px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "12px", color: "#ef4444" }}>
-            {error}
+    <div className="container" style={{ padding: "40px 24px 100px" }}>
+      <div style={{ maxWidth: "600px", margin: "0 auto" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "24px", marginBottom: "40px" }}>
+          {session?.user?.image ? (
+            <img src={session.user.image} alt="" style={{ width: 80, height: 80, borderRadius: "50%", border: "2px solid var(--border)" }} />
+          ) : (
+            <div style={{ width: 80, height: 80, borderRadius: "50%", background: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem", color: "#000", fontWeight: 800 }}>
+              {session?.user?.name?.charAt(0)}
+            </div>
+          )}
+          <div>
+            <h1 style={{ fontSize: "2rem", fontWeight: 800 }}>{session?.user?.name}</h1>
+            <p style={{ color: "var(--text-secondary)" }}>{session?.user?.email}</p>
+            <div style={{ 
+              display: "inline-block", padding: "4px 12px", borderRadius: "9999px", 
+              background: (session?.user as any).role === "ADMIN" ? "rgba(59, 130, 246, 0.1)" : "rgba(255,255,255,0.05)",
+              color: (session?.user as any).role === "ADMIN" ? "#3b82f6" : "var(--text-secondary)",
+              fontSize: "0.8rem", fontWeight: 600, marginTop: "8px", border: "1px solid currentColor"
+            }}>
+              {(session?.user as any).role || "USER"}
+            </div>
           </div>
-        )}
-        {message && (
-          <div style={{ padding: "14px 18px", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: "12px", color: "#22c55e" }}>
-            {message}
-          </div>
-        )}
-
-        <div className="formGroup">
-          <label className="formLabel">Display Name</label>
-          <input className="formInput" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your profile name" />
         </div>
 
-        <div className="formGroup">
-          <label className="formLabel">Bio</label>
-          <textarea className="formTextarea" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tell us about yourself..." />
+        <div className="featureCard" style={{ padding: "32px" }}>
+          <h2 style={{ fontSize: "1.4rem", marginBottom: "24px" }}>Bedrock Identity</h2>
+          <form onSubmit={handleSave}>
+            <div className="formGroup">
+              <label className="formLabel">Minecraft Gamertag</label>
+              <div style={{ position: "relative" }}>
+                <input 
+                  type="text" 
+                  className="formInput" 
+                  placeholder="Enter your Gamertag"
+                  value={gamertag}
+                  onChange={(e) => setGamertag(e.target.value)}
+                  style={{ paddingLeft: "44px" }}
+                />
+                <div style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", opacity: 0.5 }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+              </div>
+              <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: "8px" }}>
+                Your gamertag will be used for rankings and server verification.
+              </p>
+            </div>
+
+            <button 
+              type="submit" 
+              className="btnPrimary" 
+              style={{ width: "100%", marginTop: "12px" }}
+              disabled={saving}
+            >
+              {saving ? "Saving..." : "Save Profile"}
+            </button>
+            {message && (
+              <p style={{ 
+                marginTop: "16px", textAlign: "center", fontSize: "0.9rem",
+                color: message.includes("success") ? "#22c55e" : "#ef4444"
+              }}>
+                {message}
+              </p>
+            )}
+          </form>
         </div>
 
-        <div className="formGroup">
-          <label className="formLabel">Website</label>
-          <input className="formInput" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://yourwebsite.com" />
+        <div style={{ marginTop: "32px", textAlign: "center" }}>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
+            Want to verify your account officially? <br />
+            <span style={{ color: "var(--primary)", cursor: "pointer" }}>Join our Discord</span> to link your Xbox account.
+          </p>
         </div>
-
-        <div className="formGroup">
-          <label className="formLabel">Twitter</label>
-          <input className="formInput" value={twitter} onChange={(e) => setTwitter(e.target.value)} placeholder="@yourtwitter" />
-        </div>
-
-        <div className="formGroup">
-          <label className="formLabel">Discord Username</label>
-          <input className="formInput" value={discord} onChange={(e) => setDiscord(e.target.value)} placeholder="YourDiscord#1234" />
-        </div>
-
-        <button type="submit" disabled={saving} className="btnPrimary" style={{ width: "100%", padding: "16px", fontSize: "1rem", opacity: saving ? 0.7 : 1 }}>
-          {saving ? "Saving profile..." : "Save Profile"}
-        </button>
-      </form>
-
-      <div style={{ marginTop: "28px", color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-        <p>
-          Your profile helps other players recognize you on BedrockHub.
-        </p>
-        <p>
-          <Link href="/rankings" className="btnOutline" style={{ marginTop: "12px", display: "inline-block" }}>
-            View Rankings
-          </Link>
-        </p>
       </div>
     </div>
   );
