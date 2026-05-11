@@ -13,14 +13,10 @@ const sortOptions = [
 ];
 
 export default function SearchPage() {
-<<<<<<< HEAD
   const [tab, setTab] = useState<"resources" | "servers" | "communities">("resources");
   const [resources, setResources] = useState<any[]>([]);
   const [servers, setServers] = useState<any[]>([]);
   const [communities, setCommunities] = useState<any[]>([]);
-=======
-  const [resources, setResources] = useState<any[]>([]);
->>>>>>> e8416ed (Initial commit from Antigravity)
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("All");
@@ -30,7 +26,6 @@ export default function SearchPage() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   useEffect(() => {
-<<<<<<< HEAD
     setLoading(true);
     Promise.all([
       fetch("/api/resources").then(res => res.json()),
@@ -41,14 +36,6 @@ export default function SearchPage() {
         if (Array.isArray(resData)) setResources(resData);
         if (Array.isArray(srvData)) setServers(srvData);
         if (Array.isArray(comData)) setCommunities(comData);
-=======
-    fetch("/api/resources")
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setResources(data);
-        }
->>>>>>> e8416ed (Initial commit from Antigravity)
         setLoading(false);
       })
       .catch(err => {
@@ -58,7 +45,6 @@ export default function SearchPage() {
   }, []);
 
   const filtered = useMemo(() => {
-<<<<<<< HEAD
     let results = tab === "resources" ? [...resources] : tab === "servers" ? [...servers] : [...communities];
 
     if (query.trim()) {
@@ -96,28 +82,6 @@ export default function SearchPage() {
 
     return results;
   }, [resources, servers, communities, tab, query, typeFilter, tagFilter, resFilter, sortBy]);
-=======
-    let results = [...resources];
-
-    if (query.trim()) {
-      const q = query.toLowerCase();
-      results = results.filter(r =>
-        r.title.toLowerCase().includes(q) ||
-        (r.author?.name || "").toLowerCase().includes(q) ||
-        (r.tags || "").toLowerCase().includes(q)
-      );
-    }
-
-    if (typeFilter !== "All") results = results.filter(r => r.category === typeFilter);
-    if (tagFilter !== "All") results = results.filter(r => (r.tags || "").includes(tagFilter));
-    if (resFilter !== "All") results = results.filter(r => r.resolution === resFilter);
-
-    if (sortBy === "popular") results.sort((a, b) => b.downloads - a.downloads);
-    else if (sortBy === "az") results.sort((a, b) => a.title.localeCompare(b.title));
-
-    return results;
-  }, [resources, query, typeFilter, tagFilter, resFilter, sortBy]);
->>>>>>> e8416ed (Initial commit from Antigravity)
 
   const toggleDropdown = (id: string) => {
     setOpenDropdown(openDropdown === id ? null : id);

@@ -6,17 +6,13 @@ import { useSession, signIn } from "next-auth/react";
 
 export default function UploadPage() {
   const { data: session, status } = useSession();
-<<<<<<< HEAD
   const [uploadType, setUploadType] = useState<"resource" | "server" | "community" | "">("");
-=======
->>>>>>> e8416ed (Initial commit from Antigravity)
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     type: "TexturePack",
     resolution: "16x",
     tags: "",
-<<<<<<< HEAD
     serverIp: "",
     serverPort: "19132",
     discordLink: "",
@@ -26,10 +22,6 @@ export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
-=======
-  });
-  const [file, setFile] = useState<File | null>(null);
->>>>>>> e8416ed (Initial commit from Antigravity)
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,10 +30,7 @@ export default function UploadPage() {
   const [dragActive, setDragActive] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const imgRef = useRef<HTMLInputElement>(null);
-<<<<<<< HEAD
   const thumbnailRef = useRef<HTMLInputElement>(null);
-=======
->>>>>>> e8416ed (Initial commit from Antigravity)
 
   if (status === "loading") {
     return (
@@ -79,7 +68,6 @@ export default function UploadPage() {
     );
   }
 
-<<<<<<< HEAD
   const handleThumbnailSelect = (files: FileList | null) => {
     if (!files || files.length === 0) return;
     const file = files[0];
@@ -95,7 +83,8 @@ export default function UploadPage() {
   const removeThumbnail = () => {
     setThumbnail(null);
     setThumbnailPreview("");
-=======
+  };
+
   const handleImageSelect = (files: FileList | null) => {
     if (!files) return;
     const newImages = Array.from(files).slice(0, 5);
@@ -112,7 +101,6 @@ export default function UploadPage() {
       };
       reader.readAsDataURL(img);
     });
->>>>>>> e8416ed (Initial commit from Antigravity)
   };
 
   const removeImage = (index: number) => {
@@ -142,7 +130,6 @@ export default function UploadPage() {
     e.preventDefault();
     setError("");
 
-<<<<<<< HEAD
     // Validation based on upload type
     if (!thumbnail) {
       setError("Thumbnail/Preview image is required for all uploads.");
@@ -178,19 +165,11 @@ export default function UploadPage() {
       }
     }
 
-=======
-    if (!file) {
-      setError("You must select a file to upload.");
-      return;
-    }
-
->>>>>>> e8416ed (Initial commit from Antigravity)
     setIsSubmitting(true);
     try {
       const fd = new FormData();
       fd.append("title", formData.title);
       fd.append("description", formData.description);
-<<<<<<< HEAD
       fd.append("category", uploadType === "resource" ? formData.type : uploadType === "server" ? "Server" : "Community");
       fd.append("resolution", uploadType === "resource" ? formData.resolution : "");
       fd.append("tags", formData.tags);
