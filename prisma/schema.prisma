@@ -102,6 +102,7 @@ model Resource {
 
   fileUrl     String?
   fileName    String?
+  fileSize    Int?
 
   author      User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
   versions    ResourceVersion[]
