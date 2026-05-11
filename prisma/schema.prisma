@@ -40,20 +40,28 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  gamertag      String?   @unique // Minecraft Gamertag
-  bio           String?   // User bio
-  website       String?   // Personal website
-  twitter       String?   // Twitter handle
-  discord       String?   // Discord username
-  role          String    @default("USER") // "USER" or "ADMIN"
-  joinedAt      DateTime  @default(now()) // Join date
+  gamertag      String?   @unique
+  bio           String?
+  website       String?
+  twitter       String?
+  discord       String?
+  role          String    @default("USER")
+  isVerified    Boolean   @default(false)
+  joinedAt      DateTime  @default(now())
 
   accounts      Account[]
   sessions      Session[]
   tierRankings  TierRanking[]
   resources     Resource[]
   comments      Comment[]
+  reviews       ResourceReview[]
   likes         ResourceLike[]
+  serverLikes   ServerLike[]
+  communityLikes CommunityLike[]
+  collections   ResourceCollection[]
+  forumThreads  ForumThread[]
+  forumPosts    ForumPost[]
+  applications  VerificationApplication[]
 }
 
 model VerificationToken {
@@ -67,9 +75,9 @@ model VerificationToken {
 model TierRanking {
   id        String   @id @default(cuid())
   userId    String
-  category  String   // e.g., "Pot", "NethOP", "Overall"
-  tier      String   // e.g., "HT1", "T1", "T2"
-  region    String?  // e.g., "NA", "EU"
+  category  String
+  tier      String
+  region    String?
   updatedAt DateTime @updatedAt
   
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -82,33 +90,49 @@ model Resource {
   title       String
   description String
   category    String   // "Addon", "TexturePack", "Map", "Skin", "Shader"
-  resolution  String?  // "16x", "32x", "64x", etc.
-  tags        String?  // comma-separated tags
-  fileUrl     String?  // path to uploaded file
-  fileName    String?  // original filename
-  fileSize    Int?     // file size in bytes
-  thumbnail   String?  // preview image for browse page
-  thumbnails  String?  // comma-separated paths to uploaded screenshots
-  status      String   @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
+  resolution  String?
+  tags        String?
+  thumbnail   String?
+  status      String   @default("PENDING")
   downloads   Int      @default(0)
+  views       Int      @default(0)
   authorId    String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   author      User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  comments    Comment[]
+  versions    ResourceVersion[]
+  reviews     ResourceReview[]
   likes       ResourceLike[]
+  comments    Comment[]
+  collectionItems CollectionItem[]
 }
 
-model Comment {
-  id         String   @id @default(cuid())
-  content    String
-  resourceId String
-  userId     String
-  createdAt  DateTime @default(now())
+model ResourceVersion {
+  id          String   @id @default(cuid())
+  resourceId  String
+  version     String   // e.g., "1.0.0"
+  changelog   String?
+  fileUrl     String
+  fileName    String
+  fileSize    Int
+  createdAt   DateTime @default(now())
 
-  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resource    Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+}
+
+model ResourceReview {
+  id          String   @id @default(cuid())
+  resourceId  String
+  userId      String
+  rating      Int      // 1-5
+  content     String?
+  createdAt   DateTime @default(now())
+
+  resource    Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([resourceId, userId])
 }
 
 model ResourceLike {
@@ -122,24 +146,33 @@ model ResourceLike {
   @@unique([resourceId, userId])
 }
 
+model Comment {
+  id         String   @id @default(cuid())
+  content    String
+  resourceId String
+  userId     String
+  createdAt  DateTime @default(now())
+
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model Server {
   id          String   @id @default(cuid())
   name        String
   ip          String   @unique
   port        Int      @default(19132)
   description String
-  thumbnail   String?  // preview image for browse page
-  discordLink String?  // Discord server invite
-  youtubeLink String?  // YouTube channel link
-  trailerVideo String? // trailer/showcase video URL
-  screenshots String?  // comma-separated paths to uploaded screenshots
-  status      String   @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
+  thumbnail   String?
+  discordLink String?
+  youtubeLink String?
+  trailerVideo String?
+  screenshots String?
+  status      String   @default("PENDING")
   votes       Int      @default(0)
   createdAt   DateTime @default(now())
 
   likes       ServerLike[]
-
-  @@index([createdAt])
 }
 
 model ServerLike {
@@ -148,6 +181,7 @@ model ServerLike {
   userId   String
 
   server   Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([serverId, userId])
 }
@@ -157,13 +191,11 @@ model Community {
   name        String
   discordLink String
   description String
-  thumbnail   String?  // preview image for browse page
-  status      String   @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
+  thumbnail   String?
+  status      String   @default("PENDING")
   createdAt   DateTime @default(now())
 
   likes       CommunityLike[]
-
-  @@index([createdAt])
 }
 
 model CommunityLike {
@@ -172,6 +204,77 @@ model CommunityLike {
   userId      String
 
   community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([communityId, userId])
+}
+
+model ResourceCollection {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  userId      String
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       CollectionItem[]
+}
+
+model CollectionItem {
+  id            String @id @default(cuid())
+  collectionId  String
+  resourceId    String
+
+  collection    ResourceCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  resource      Resource           @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, resourceId])
+}
+
+model ForumCategory {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  order       Int      @default(0)
+
+  threads     ForumThread[]
+}
+
+model ForumThread {
+  id          String   @id @default(cuid())
+  categoryId  String
+  authorId    String
+  title       String
+  content     String
+  isLocked    Boolean  @default(false)
+  isPinned    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category    ForumCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  author      User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  posts       ForumPost[]
+}
+
+model ForumPost {
+  id          String   @id @default(cuid())
+  threadId    String
+  authorId    String
+  content     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  thread      ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  author      User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model VerificationApplication {
+  id          String   @id @default(cuid())
+  userId      String
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  message     String?
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

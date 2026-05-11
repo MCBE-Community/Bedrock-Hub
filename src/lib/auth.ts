@@ -29,21 +29,17 @@ export const authOptions: NextAuthOptions = {
         
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
-          select: { gamertag: true, role: true }
+          select: { gamertag: true, role: true, email: true }
         });
 
-        // Bootstrap Admin: First user is always ADMIN
-        if (dbUser && dbUser.role === "USER") {
-          const userCount = await prisma.user.count();
-          if (userCount === 1) {
-            await prisma.user.update({
-              where: { id: user.id },
-              data: { role: "ADMIN" }
-            });
-            (session.user as any).role = "ADMIN";
-          } else {
-            (session.user as any).role = dbUser.role;
-          }
+        const adminEmails = process.env.ADMIN_EMAILS?.split(",") || [];
+        
+        if (dbUser?.email && adminEmails.includes(dbUser.email) && dbUser.role !== "ADMIN") {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { role: "ADMIN" }
+          });
+          (session.user as any).role = "ADMIN";
         } else {
           (session.user as any).role = dbUser?.role || "USER";
         }
