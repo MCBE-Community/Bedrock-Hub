@@ -1,146 +1,194 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [pending, setPending] = useState<any>(null);
+  const [tab, setTab] = useState<"pending" | "users" | "applications">("pending");
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("resources");
+  const [submitting, setSubmitting] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/");
+      router.push("/auth/signin");
     } else if (session?.user && (session.user as any).role !== "ADMIN") {
       router.push("/");
     } else if (status === "authenticated") {
-      fetchPending();
+      fetchData();
     }
-  }, [status, session]);
+  }, [status, session, tab]);
 
-  const fetchPending = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/pending");
-      const data = await res.json();
-      setPending(data);
-    } catch (error) {
-      console.error("Error fetching pending:", error);
-    } finally {
-      setLoading(false);
+      const endpoint = tab === "pending" ? "/api/admin/pending" : tab === "users" ? "/api/admin/users" : "/api/admin/applications";
+      const res = await fetch(endpoint);
+      const json = await res.json();
+      setData(json);
+    } catch (e) {
+      console.error(e);
     }
+    setLoading(false);
   };
 
-  const handleAction = async (id: string, type: string, action: "APPROVE" | "REJECT") => {
+  const handleAction = async (type: string, id: string, action: string) => {
+    setSubmitting(id);
     try {
-      const res = await fetch("/api/admin/action", {
+      await fetch("/api/admin/action", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, type, action }),
+        body: JSON.stringify({ type, id, action }),
       });
-      if (res.ok) {
-        fetchPending(); // Refresh
-      }
-    } catch (error) {
-      console.error("Action error:", error);
+      fetchData();
+    } catch (e) {
+      console.error(e);
     }
+    setSubmitting(null);
   };
 
-  if (status === "loading" || loading) {
-    return (
-      <div className="container" style={{ padding: "100px 0", textAlign: "center" }}>
-        <div style={{ width: 40, height: 40, border: "3px solid var(--border)", borderTopColor: "var(--primary)", borderRadius: "50%", animation: "spin 1s linear infinite", margin: "0 auto" }} />
-        <p style={{ marginTop: "20px", color: "var(--text-secondary)" }}>Loading Dashboard...</p>
-      </div>
-    );
-  }
+  const handleUserUpdate = async (userId: string, updates: any) => {
+    setSubmitting(userId);
+    try {
+      await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, ...updates }),
+      });
+      fetchData();
+    } catch (e) {
+      console.error(e);
+    }
+    setSubmitting(null);
+  };
 
-  const currentList = pending ? pending[activeTab] : [];
+  if (status === "loading" || loading) return <div className="container" style={{ padding: "100px 0", textAlign: "center" }}>Loading Admin Tools...</div>;
 
   return (
     <div className="container" style={{ padding: "40px 24px 100px" }}>
       <div style={{ marginBottom: "48px" }}>
-        <h1 style={{ fontSize: "2.5rem", fontWeight: 800, marginBottom: "8px" }}>Admin Dashboard</h1>
-        <p style={{ color: "var(--text-secondary)" }}>Review and moderate community submissions.</p>
+        <h1 style={{ fontSize: "2.5rem", fontWeight: 800, marginBottom: "8px" }}>Admin Panel</h1>
+        <p style={{ color: "var(--text-secondary)" }}>Platform oversight and content moderation.</p>
       </div>
 
-      <div className="filterRow" style={{ marginBottom: "32px" }}>
-        <button 
-          className="filterBtn" 
-          style={activeTab === "resources" ? { backgroundColor: "var(--primary)", color: "var(--bg)" } : {}}
-          onClick={() => setActiveTab("resources")}
-        >
-          Resources ({pending?.resources?.length || 0})
-        </button>
-        <button 
-          className="filterBtn" 
-          style={activeTab === "servers" ? { backgroundColor: "var(--primary)", color: "var(--bg)" } : {}}
-          onClick={() => setActiveTab("servers")}
-        >
-          Servers ({pending?.servers?.length || 0})
-        </button>
-        <button 
-          className="filterBtn" 
-          style={activeTab === "communities" ? { backgroundColor: "var(--primary)", color: "var(--bg)" } : {}}
-          onClick={() => setActiveTab("communities")}
-        >
-          Communities ({pending?.communities?.length || 0})
-        </button>
+      <div style={{ display: "flex", gap: "8px", marginBottom: "32px", borderBottom: "1px solid var(--border)", paddingBottom: "16px" }}>
+        {[
+          { id: "pending", label: "Pending Uploads" },
+          { id: "users", label: "User Management" },
+          { id: "applications", label: "Verification Apps" },
+        ].map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id as any)}
+            style={{
+              padding: "10px 20px", borderRadius: "10px",
+              background: tab === t.id ? "rgba(255,255,255,0.05)" : "transparent",
+              color: tab === t.id ? "var(--primary)" : "var(--text-secondary)",
+              border: tab === t.id ? "1px solid var(--border)" : "1px solid transparent",
+              fontWeight: 600, fontSize: "0.9rem"
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
-      <div style={{ display: "grid", gap: "20px" }}>
-        {currentList.length === 0 ? (
-          <div style={{ 
-            padding: "60px", textAlign: "center", background: "var(--bg-card)", 
-            border: "1px solid var(--border)", borderRadius: "24px", color: "var(--text-muted)" 
-          }}>
-            No pending {activeTab} at the moment.
-          </div>
-        ) : (
-          currentList.map((item: any) => (
-            <div key={item.id} className="featureCard" style={{ display: "flex", gap: "24px", alignItems: "center", padding: "24px" }}>
-              <div style={{ 
-                width: "120px", height: "80px", borderRadius: "12px", 
-                background: `url(${item.thumbnail || '/placeholder.png'}) center/cover`,
-                border: "1px solid var(--border)"
-              }} />
-              <div style={{ flexGrow: 1 }}>
-                <h3 style={{ fontSize: "1.2rem", marginBottom: "4px" }}>{item.name || item.title}</h3>
-                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "8px", display: "flex", gap: "12px" }}>
-                  <span>Author: {item.author?.name || "Unknown"}</span>
-                  <span>Date: {new Date(item.createdAt).toLocaleDateString()}</span>
-                  {item.category && <span>Category: {item.category}</span>}
-                </p>
-                <div style={{ display: "flex", gap: "12px" }}>
-                  <button 
-                    onClick={() => handleAction(item.id, activeTab.slice(0, -1), "APPROVE")}
-                    style={{ padding: "8px 20px", background: "#22c55e", color: "#000", fontWeight: 600, borderRadius: "9999px", fontSize: "0.85rem" }}
-                  >
-                    Approve
-                  </button>
-                  <button 
-                    onClick={() => handleAction(item.id, activeTab.slice(0, -1), "REJECT")}
-                    style={{ padding: "8px 20px", background: "rgba(239, 68, 68, 0.1)", border: "1px solid #ef4444", color: "#ef4444", fontWeight: 600, borderRadius: "9999px", fontSize: "0.85rem" }}
-                  >
-                    Reject
-                  </button>
-                  <a 
-                    href={item.category ? `/resource/${item.id}` : '#'} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    style={{ padding: "8px 20px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border)", borderRadius: "9999px", fontSize: "0.85rem" }}
-                  >
-                    Preview
-                  </a>
-                </div>
+      {tab === "pending" && (
+        <div style={{ display: "grid", gap: "32px" }}>
+          {["resources", "servers", "communities"].map(type => (
+            <div key={type}>
+              <h2 style={{ fontSize: "1.2rem", textTransform: "capitalize", marginBottom: "20px", color: "var(--text-muted)" }}>{type}</h2>
+              <div style={{ display: "grid", gap: "16px" }}>
+                {data?.[type]?.map((item: any) => (
+                  <div key={item.id} className="featureCard" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px" }}>
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{item.title || item.name}</div>
+                      <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>by {item.author?.name || "System"} • {new Date(item.createdAt).toLocaleDateString()}</div>
+                    </div>
+                    <div style={{ display: "flex", gap: "12px" }}>
+                      <button onClick={() => handleAction(type, item.id, "APPROVE")} disabled={!!submitting} className="btnPrimary" style={{ padding: "8px 16px", fontSize: "0.85rem" }}>Approve</button>
+                      <button onClick={() => handleAction(type, item.id, "REJECT")} disabled={!!submitting} className="btnOutline" style={{ padding: "8px 16px", fontSize: "0.85rem", borderColor: "#ef4444", color: "#ef4444" }}>Reject</button>
+                    </div>
+                  </div>
+                ))}
+                {(!data?.[type] || data[type].length === 0) && <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>No pending {type}.</p>}
               </div>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
+
+      {tab === "users" && (
+        <div className="featureCard" style={{ padding: "0", overflow: "hidden" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
+            <thead>
+              <tr style={{ background: "rgba(255,255,255,0.02)", textAlign: "left", borderBottom: "1px solid var(--border)" }}>
+                <th style={{ padding: "16px" }}>User</th>
+                <th style={{ padding: "16px" }}>Email</th>
+                <th style={{ padding: "16px" }}>Role</th>
+                <th style={{ padding: "16px" }}>Status</th>
+                <th style={{ padding: "16px" }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.map((u: any) => (
+                <tr key={u.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                  <td style={{ padding: "16px", fontWeight: 500 }}>{u.name}</td>
+                  <td style={{ padding: "16px", color: "var(--text-secondary)" }}>{u.email}</td>
+                  <td style={{ padding: "16px" }}>
+                    <select 
+                      value={u.role} 
+                      onChange={(e) => handleUserUpdate(u.id, { role: e.target.value })}
+                      style={{ background: "#0a0a0a", color: "white", border: "1px solid var(--border)", borderRadius: "4px", padding: "4px" }}
+                    >
+                      <option value="USER">USER</option>
+                      <option value="ADMIN">ADMIN</option>
+                    </select>
+                  </td>
+                  <td style={{ padding: "16px" }}>
+                    {u.isVerified ? <span style={{ color: "#22c55e" }}>Verified</span> : <span style={{ color: "var(--text-muted)" }}>Standard</span>}
+                  </td>
+                  <td style={{ padding: "16px" }}>
+                    <button 
+                      onClick={() => handleUserUpdate(u.id, { isVerified: !u.isVerified })}
+                      style={{ fontSize: "0.8rem", color: "var(--primary)", background: "none", border: "none", cursor: "pointer" }}
+                    >
+                      {u.isVerified ? "Revoke Verification" : "Verify User"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {tab === "applications" && (
+        <div style={{ display: "grid", gap: "16px" }}>
+          {data?.map((app: any) => (
+            <div key={app.id} className="featureCard" style={{ padding: "24px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: "1.1rem" }}>{app.user?.name}</div>
+                  <div style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>{app.user?.email}</div>
+                </div>
+                <div style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>{new Date(app.createdAt).toLocaleString()}</div>
+              </div>
+              <div style={{ background: "rgba(255,255,255,0.03)", padding: "16px", borderRadius: "12px", marginBottom: "20px", fontSize: "0.9rem", lineHeight: 1.6 }}>
+                {app.message}
+              </div>
+              <div style={{ display: "flex", gap: "12px" }}>
+                <button onClick={() => handleUserUpdate(app.user.id, { isVerified: true })} className="btnPrimary" style={{ padding: "8px 20px" }}>Approve & Verify</button>
+                <button className="btnOutline" style={{ padding: "8px 20px", color: "#ef4444", borderColor: "#ef4444" }}>Decline</button>
+              </div>
+            </div>
+          ))}
+          {data?.length === 0 && <p style={{ textAlign: "center", color: "var(--text-muted)", padding: "40px" }}>No pending verification applications.</p>}
+        </div>
+      )}
     </div>
   );
 }
