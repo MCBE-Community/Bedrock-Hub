@@ -29,22 +29,42 @@ export const authOptions: NextAuthOptions = {
         
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
-          select: { gamertag: true, role: true, email: true }
+          select: { gamertag: true, role: true, email: true, username: true, onboardingComplete: true }
         });
 
         const adminEmails = process.env.ADMIN_EMAILS?.split(",") || [];
         
-        if (dbUser?.email && adminEmails.includes(dbUser.email) && dbUser.role !== "ADMIN") {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { role: "ADMIN" }
-          });
-          (session.user as any).role = "ADMIN";
+        if (dbUser?.email) {
+          const isAdminEmail = adminEmails.includes(dbUser.email);
+          if (isAdminEmail && dbUser.role !== "ADMIN") {
+            await prisma.user.update({ where: { id: user.id }, data: { role: "ADMIN" } });
+            (session.user as any).role = "ADMIN";
+          } else if (!isAdminEmail && dbUser.role === "ADMIN") {
+            await prisma.user.update({ where: { id: user.id }, data: { role: "USER" } });
+            (session.user as any).role = "USER";
+          } else {
+            (session.user as any).role = dbUser.role;
+          }
         } else {
           (session.user as any).role = dbUser?.role || "USER";
         }
 
-        (session.user as any).gamertag = dbUser?.gamertag;
+        let currentGamertag = dbUser?.gamertag;
+
+        // Auto-sync gamertag from Microsoft/Xbox profile if they connected it
+        if (!currentGamertag && user.name) {
+          const azureAccount = await prisma.account.findFirst({
+            where: { userId: user.id, provider: 'azure-ad' }
+          });
+          if (azureAccount) {
+            await prisma.user.update({ where: { id: user.id }, data: { gamertag: user.name } });
+            currentGamertag = user.name;
+          }
+        }
+
+        (session.user as any).gamertag = currentGamertag;
+        (session.user as any).username = dbUser?.username;
+        (session.user as any).onboardingComplete = dbUser?.onboardingComplete;
       }
       return session;
     },

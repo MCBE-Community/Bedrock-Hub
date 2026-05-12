@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 
+import { ThemeToggle } from "./ThemeToggle";
+import { NotificationsDropdown } from "./NotificationsDropdown";
+
 const links = [
   { href: "/", label: "Home" },
   { href: "/discover", label: "Browse" },
@@ -44,10 +47,14 @@ export function NavbarClient() {
         </ul>
 
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <ThemeToggle />
+          
           {status === "loading" ? (
             <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(255,255,255,0.06)", animation: "pulse 1.5s infinite" }} />
           ) : session?.user ? (
-            <div style={{ position: "relative" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <NotificationsDropdown />
+              <div style={{ position: "relative" }}>
               <button onClick={() => setOpen(!open)} style={{
                 display: "flex", alignItems: "center", gap: "10px", padding: "4px 12px 4px 4px",
                 borderRadius: "9999px", background: "rgba(255,255,255,0.06)", border: "1px solid var(--border)", cursor: "pointer",
@@ -88,6 +95,7 @@ export function NavbarClient() {
                 </div>
               )}
             </div>
+          </div>
           ) : (
             <button 
               onClick={() => signIn("discord")}

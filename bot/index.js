@@ -63,10 +63,16 @@ client.on('interactionCreate', async interaction => {
     const tier = interaction.options.getString('tier');
 
     try {
-      // Find the user in DB
-      const dbUser = await prisma.user.findUnique({
-        where: { id: targetUser.id } // Requires NextAuth to use Discord IDs as User IDs
+      // Find the user in DB through the Account model linked by NextAuth
+      const linkedAccount = await prisma.account.findFirst({
+        where: { 
+          provider: 'discord',
+          providerAccountId: targetUser.id 
+        },
+        include: { user: true }
       });
+
+      const dbUser = linkedAccount ? linkedAccount.user : null;
 
       if (!dbUser) {
         return interaction.reply({ content: 'Este usuario no ha iniciado sesión en la web de Bedrock Hub aún.', ephemeral: true });
@@ -85,6 +91,16 @@ client.on('interactionCreate', async interaction => {
           userId: dbUser.id,
           category: category,
           tier: tier
+        }
+      });
+
+      // Create an in-app notification
+      await prisma.notification.create({
+        data: {
+          userId: dbUser.id,
+          message: `Your tier has been updated to ${tier} in the ${category} category.`,
+          type: "TIER_UPGRADE",
+          link: "/rankings"
         }
       });
 

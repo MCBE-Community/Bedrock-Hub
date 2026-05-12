@@ -2,7 +2,7 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
+:root, [data-theme='dark'] {
   --bg: #000000;
   --bg-secondary: #0a0a0a;
   --bg-card: rgba(255, 255, 255, 0.02);
@@ -22,6 +22,21 @@
   --max-width: 1200px;
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Plus Jakarta Sans', sans-serif;
+}
+
+[data-theme='light'] {
+  --bg: #ffffff;
+  --bg-secondary: #f4f4f5;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fafafa;
+  --border: rgba(0, 0, 0, 0.1);
+  --border-hover: rgba(0, 0, 0, 0.2);
+  --primary: #000000;
+  --primary-hover: #27272a;
+  --accent: #2563eb;
+  --text: #09090b;
+  --text-secondary: #52525b;
+  --text-muted: #a1a1aa;
 }
 
 html { scroll-behavior: smooth; }

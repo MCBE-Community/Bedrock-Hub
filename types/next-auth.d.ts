@@ -7,6 +7,10 @@ declare module "next-auth" {
       name?: string | null;
       email?: string | null;
       image?: string | null;
+      role?: string;
+      gamertag?: string | null;
+      username?: string | null;
+      onboardingComplete?: boolean;
     };
   }
 

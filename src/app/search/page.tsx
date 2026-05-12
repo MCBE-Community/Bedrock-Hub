@@ -1,11 +1,14 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useMemo, useEffect } from "react";
+import { ServerCard } from "@/components/ServerCard";
 
 const typeOptions = ["All", "TexturePack", "Addon", "Map", "Shader", "Skin"];
 const tagOptions = ["All", "PvP", "Original", "Aesthetic", "FPS Boost", "Bedwars", "Crystal", "Anime", "Shaders", "Survival", "Sky", "Skyblock"];
 const resOptions = ["All", "16x", "32x", "64x", "128x", "256x"];
+const versionOptions = ["All", "1.21", "1.20", "1.19"];
 const sortOptions = [
   { label: "Most Recent", value: "recent" },
   { label: "Most Popular", value: "popular" },
@@ -22,13 +25,23 @@ export default function SearchPage() {
   const [typeFilter, setTypeFilter] = useState("All");
   const [tagFilter, setTagFilter] = useState("All");
   const [resFilter, setResFilter] = useState("All");
+  const [versionFilter, setVersionFilter] = useState("All");
   const [sortBy, setSortBy] = useState("recent");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
+    
+    // Add dynamic query params based on state (debounced ideally, but here directly)
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    if (typeFilter !== "All") params.set("category", typeFilter);
+    if (resFilter !== "All") params.set("resolution", resFilter);
+    if (versionFilter !== "All") params.set("version", versionFilter);
+    params.set("sort", sortBy);
+
     Promise.all([
-      fetch("/api/resources").then(res => res.json()),
+      fetch(`/api/resources?${params.toString()}`).then(res => res.json()),
       fetch("/api/servers").then(res => res.json()),
       fetch("/api/communities").then(res => res.json()),
     ])
@@ -42,7 +55,7 @@ export default function SearchPage() {
         console.error(err);
         setLoading(false);
       });
-  }, []);
+  }, [query, typeFilter, resFilter, versionFilter, sortBy]);
 
   const filtered = useMemo(() => {
     let results = tab === "resources" ? [...resources] : tab === "servers" ? [...servers] : [...communities];
@@ -70,18 +83,13 @@ export default function SearchPage() {
     }
 
     if (tab === "resources") {
-      if (typeFilter !== "All") results = results.filter(r => r.category === typeFilter);
       if (tagFilter !== "All") results = results.filter(r => (r.tags || "").includes(tagFilter));
-      if (resFilter !== "All") results = results.filter(r => r.resolution === resFilter);
-
-      if (sortBy === "popular") results.sort((a, b) => b.downloads - a.downloads);
-      else if (sortBy === "az") results.sort((a, b) => a.title.localeCompare(b.title));
     } else {
       results.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0));
     }
 
     return results;
-  }, [resources, servers, communities, tab, query, typeFilter, tagFilter, resFilter, sortBy]);
+  }, [resources, servers, communities, tab, query, tagFilter]);
 
   const toggleDropdown = (id: string) => {
     setOpenDropdown(openDropdown === id ? null : id);
@@ -183,6 +191,7 @@ export default function SearchPage() {
           <DropdownBtn id="type" label="All Types" options={typeOptions} value={typeFilter} onChange={setTypeFilter} />
           <DropdownBtn id="tag" label="All Tags" options={tagOptions} value={tagFilter} onChange={setTagFilter} />
           <DropdownBtn id="res" label="Any Resolution" options={resOptions} value={resFilter} onChange={setResFilter} />
+          <DropdownBtn id="ver" label="Any Version" options={versionOptions} value={versionFilter} onChange={setVersionFilter} />
           <div style={{ position: "relative" }}>
             <button className="filterBtn" onClick={() => toggleDropdown("sort")}>
               {sortOptions.find(s => s.value === sortBy)?.label}
@@ -216,9 +225,9 @@ export default function SearchPage() {
             )}
           </div>
 
-          {(typeFilter !== "All" || tagFilter !== "All" || resFilter !== "All") && (
+          {(typeFilter !== "All" || tagFilter !== "All" || resFilter !== "All" || versionFilter !== "All") && (
             <button
-              onClick={() => { setTypeFilter("All"); setTagFilter("All"); setResFilter("All"); }}
+              onClick={() => { setTypeFilter("All"); setTagFilter("All"); setResFilter("All"); setVersionFilter("All"); setQuery(""); }}
               style={{
                 padding: "10px 16px", borderRadius: "9999px",
                 background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)",
@@ -251,7 +260,7 @@ export default function SearchPage() {
                     <div className="resourceCard">
                       <div className="cardImageWrap">
                         {imageUrl ? (
-                          <img src={imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          <Image src={imageUrl} alt="" fill sizes="(max-width: 768px) 100vw, 300px" style={{ objectFit: "cover" }} />
                         ) : (
                           <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#0a0a0a" }}>
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -278,41 +287,44 @@ export default function SearchPage() {
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "24px" }}>
               {filtered.map((item) => (
-                <div key={item.id} style={{
-                  padding: "20px",
-                  border: "1px solid var(--border)",
-                  borderRadius: "12px",
-                  background: "rgba(255,255,255,0.02)",
-                  backdropFilter: "blur(20px)",
-                }}>
-                  {item.thumbnail && (
-                    <img src={item.thumbnail} alt="" style={{ width: "100%", height: "160px", objectFit: "cover", borderRadius: "8px", marginBottom: "16px" }} />
-                  )}
-                  <div style={{ fontSize: "1.1rem", fontWeight: 600, marginBottom: "8px" }}>{item.name}</div>
-                  <div style={{ color: "var(--text-secondary)", fontSize: "0.9rem", marginBottom: "16px", lineHeight: 1.5 }}>{item.description}</div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--text-muted)", fontSize: "0.85rem" }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01z"/></svg>
-                      {item.likeCount || 0}
+                tab === "servers" ? (
+                  <ServerCard key={item.id} server={item} />
+                ) : (
+                  <div key={item.id} style={{
+                    padding: "20px",
+                    border: "1px solid var(--border)",
+                    borderRadius: "12px",
+                    background: "rgba(255,255,255,0.02)",
+                    backdropFilter: "blur(20px)",
+                  }}>
+                    {item.thumbnail && (
+                      <div style={{ position: "relative", width: "100%", height: "160px", marginBottom: "16px", borderRadius: "8px", overflow: "hidden" }}>
+                        <Image src={item.thumbnail} alt="" fill sizes="(max-width: 768px) 100vw, 300px" style={{ objectFit: "cover" }} />
+                      </div>
+                    )}
+                    <div style={{ fontSize: "1.1rem", fontWeight: 600, marginBottom: "8px" }}>{item.name}</div>
+                    <div style={{ color: "var(--text-secondary)", fontSize: "0.9rem", marginBottom: "16px", lineHeight: 1.5 }}>{item.description}</div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--text-muted)", fontSize: "0.85rem" }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01z"/></svg>
+                        {item.likeCount || 0}
+                      </div>
+                      {item.discordLink && (
+                        <a href={item.discordLink} target="_blank" rel="noopener noreferrer" style={{
+                          padding: "6px 12px",
+                          borderRadius: "6px",
+                          background: "#5865f2",
+                          color: "white",
+                          textDecoration: "none",
+                          fontSize: "0.85rem",
+                          fontWeight: 500,
+                        }}>
+                          Discord
+                        </a>
+                      )}
                     </div>
-                    {tab === "servers" && (
-                      <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>{item.ip}:{item.port}</div>
-                    )}
-                    {tab === "communities" && item.discordLink && (
-                      <a href={item.discordLink} target="_blank" rel="noopener noreferrer" style={{
-                        padding: "6px 12px",
-                        borderRadius: "6px",
-                        background: "#5865f2",
-                        color: "white",
-                        textDecoration: "none",
-                        fontSize: "0.85rem",
-                        fontWeight: 500,
-                      }}>
-                        Discord
-                      </a>
-                    )}
                   </div>
-                </div>
+                )
               ))}
             </div>
           )}

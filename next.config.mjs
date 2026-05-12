@@ -2,7 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['cdn.discordapp.com'],
+    remotePatterns: [
+      { protocol: 'https', hostname: '**' },
+    ],
   },
 };
 

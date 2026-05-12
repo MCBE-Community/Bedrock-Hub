@@ -7,6 +7,7 @@ export async function GET(req: NextRequest) {
     const q = searchParams.get("q") || "";
     const category = searchParams.get("category") || "";
     const resolution = searchParams.get("resolution") || "";
+    const version = searchParams.get("version") || "";
     const sort = searchParams.get("sort") || "recent";
     const dateRange = searchParams.get("date") || "all";
 
@@ -20,6 +21,11 @@ export async function GET(req: NextRequest) {
     }
     if (category) where.category = category;
     if (resolution) where.resolution = resolution;
+    if (version) {
+      where.versions = {
+        some: { version: { contains: version } }
+      };
+    }
 
     if (dateRange !== "all") {
       const date = new Date();
