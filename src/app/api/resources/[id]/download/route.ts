@@ -11,7 +11,7 @@ export async function POST(
       data: { downloads: { increment: 1 } },
     });
 
-    return NextResponse.json({ fileUrl: resource.fileUrl, fileName: resource.fileName });
+    return NextResponse.json({ url: resource.fileUrl, fileName: resource.fileName });
   } catch (error) {
     return NextResponse.json({ error: "Resource not found" }, { status: 404 });
   }
